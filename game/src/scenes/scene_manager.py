@@ -1,40 +1,24 @@
-import pygame
-# from src.scenes.driving_scene import DrivingScene
-# from src.scenes.bar_scene import Bar
-# from src.scenes.base_scene import Scene
-
-
-class Scene:
-    def __init__(self, game):
-        self.game = game
-
-    def handle_events(self, events):
-        pass
-
-    def update(self):
-        pass
-
-    def draw(self, screen):
-        pass
-
-
 class SceneManager:
     def __init__(self, game):
         self.game = game
-        self.current_scene = None
+        self.scene = None
 
     def set_scene(self, scene):
-        """ Change to a new scene """
-        self.current_scene = scene(self.game)
+        """ Set the active scene """
+        self.scene = scene
 
     def handle_events(self, events):
-        if self.current_scene:
-            self.current_scene.handle_events(events)
+        """ Forward events to the current scene """
+        if self.scene:
+            self.scene.handle_events(events)
 
     def update(self):
-        if self.current_scene:
-            self.current_scene.update()
+        """ Update the current scene """
+        if self.scene:
+            self.scene.update()
 
     def draw(self, screen):
-        if self.current_scene:
-            self.current_scene.draw(screen)
+        """ Draw the current scene """
+        if self.scene:
+            self.scene.draw(screen)
+

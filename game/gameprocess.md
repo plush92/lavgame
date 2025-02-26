@@ -28,3 +28,6 @@
     2 options: either you wake up the next day and she's got breakfast waiting for you
         or: you just walk inside together and there's like a candle lit dinner?
     `HomeScene`
+
+8. After you finish HomeScene, you both walk outside into a meadow and walk until you reach a tree with a picnic
+    `MeadowScene`
