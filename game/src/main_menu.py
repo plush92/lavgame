@@ -1,5 +1,6 @@
 import pygame
 import sys
+from src.level_select import level_select
 
 WIDTH, HEIGHT = 800, 600
 WINDOW_SIZE = (WIDTH, HEIGHT)
@@ -21,16 +22,20 @@ def main_menu():
         mx, my = pygame.mouse.get_pos()
         button_1 = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2, 200, 50)
         button_2 = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 50)
+        button_3 = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 200, 200, 50)
 
         pygame.draw.rect(screen, (255, 0, 0), button_1)  # Red button
         pygame.draw.rect(screen, (0, 255, 0), button_2)  # Green button
+        pygame.draw.rect(screen, (0, 0, 255), button_3)  # Blue button
 
         # Text inside buttons
         button_font = pygame.font.Font(None, 30)
         button_1_text = button_font.render("Start Game", True, (255, 255, 255))
         button_2_text = button_font.render("Exit", True, (255, 255, 255))
+        button_3_text = button_font.render("Level Select", True, (255, 255, 255))
         screen.blit(button_1_text, (WIDTH // 2 - 50, HEIGHT // 2 + 15))
         screen.blit(button_2_text, (WIDTH // 2 - 25, HEIGHT // 2 + 115))
+        screen.blit(button_3_text, (WIDTH // 2 - 50, HEIGHT // 2 + 215))
 
         # Button interactions
         if button_1.collidepoint((mx, my)):
@@ -40,6 +45,9 @@ def main_menu():
             if click:
                 pygame.quit()
                 sys.exit()
+        if button_3.collidepoint((mx, my)):
+            if click:
+                level_select()
 
         click = False  # Reset click after checking buttons
 
