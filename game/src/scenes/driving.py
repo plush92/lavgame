@@ -3,6 +3,7 @@ import random
 
 # Constants
 WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 ROAD_WIDTH = int(WIDTH * 0.7)  # 70% of the screen width for the road
 MARGIN = (WIDTH - ROAD_WIDTH) // 2  # Space on left and right
 LANE_WIDTH = ROAD_WIDTH // 4  # Divide road into 4 lanes
@@ -82,3 +83,28 @@ class DrivingScene:
         x_position = self.lane_positions[lane] - 25  # Center in lane
         obstacle = pygame.Rect(x_position, -50, 50, 50)  # Blue square
         self.obstacles.append(obstacle)
+
+# Game loop
+def main():
+    clock = pygame.time.Clock()
+    driving_scene = DrivingScene(None)  # Pass None or game object
+
+    while driving_scene.running:  # Run only while the scene is active
+        events = pygame.event.get()
+        driving_scene.handle_events(events)
+        driving_scene.update()
+        driving_scene.draw(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+    print("Exited driving scene. Returning to main menu...")
+    return  # This will allow returning to the main menu
+
+def start_driving():
+    main()  # Runs the driving scene
+    import src.main_menu  # Import main menu module
+    src.main_menu.main_menu()  # Call the main menu again
+
+
+if __name__ == "__main__":
+    start_driving()

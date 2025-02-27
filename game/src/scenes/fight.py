@@ -66,8 +66,12 @@ class FightScene:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and not self.dialogue_active:
-                self.punch()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if self.dialogue_active:  # If dialogue is active, disable it and start fight
+                    self.dialogue_active = False
+                else:
+                    self.punch()
+
 
     def punch(self):
         """ Player attacks if close enough """
@@ -121,5 +125,8 @@ def main():
         pygame.display.flip()
         clock.tick(60)
 
+def start_fight():
+    main()  # This runs the fight scene when called
+
 if __name__ == "__main__":
-    main()
+    start_fight()
