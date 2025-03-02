@@ -2,6 +2,10 @@ import pygame  # Import pygame module
 import sys  # Import sys module
 from src.scenes.fight import start_fight  # Import FightScene class
 from src.scenes.driving import start_driving  # Import DrivingScene class
+from src.scenes.bar import start_bar_game  # Import BarScene class
+from src.scenes.date import start_date  # Import DateScene class
+# from src.scenes.home import start_home  # Import HomeScene class
+# from src.scenes.end import start_end  # Import EndScene class
 
 WIDTH, HEIGHT = 800, 600  # Screen size
 WINDOW_SIZE = (WIDTH, HEIGHT)  # Window size
@@ -73,6 +77,10 @@ def level_select():  # Level select function
                         start_fight()
                     elif labels[i] == "Driving":
                         start_driving()
+                    elif labels[i] == "Bar":
+                        start_bar_game()
+                    elif labels[i] == "Date":
+                        start_date()
             click = False  # Reset click after processing
 
         pygame.display.update()  # Update display

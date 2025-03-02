@@ -1,96 +1,97 @@
 import pygame
 
-# Initialize Pygame
+# Initialize pygame
 pygame.init()
 
-# Game window setup
+# Screen settings
 WIDTH, HEIGHT = 800, 600
+TILE_SIZE = 40
+ROWS, COLS = HEIGHT // TILE_SIZE, WIDTH // TILE_SIZE
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("PvP Fight Scene")
-
-# Clock to control frame rate
-clock = pygame.time.Clock()
-
-# Character setup
-player1 = pygame.Rect(100, 400, 50, 100)  # Player 1 position and size
-player2 = pygame.Rect(650, 400, 50, 100)  # Player 2 position and size
-
-# Health setup
-health1 = 100
-health2 = 100
+pygame.display.set_caption("Simple Maze Game")
 
 # Colors
-RED = (255, 0, 0)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
-BLACK = (0, 0, 0)
 
-# Game loop flag
-running = True
+# Game Map: 0 = wall, 1 = path, 2 = exit
+MAP = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+    [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
+    [0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0],
+    [0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
 
-def handle_controls(player, keys):
-    # Spacebar to strike
-    if keys[pygame.K_SPACE]:
-        strike(player)
-    # Down arrow to dodge
-    if keys[pygame.K_DOWN]:
-        dodge(player)
+class Player:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-def strike(player):
-    global strike_lands
-    strike_lands = False
-    # Basic strike logic: Check if within range of opponent
-    if player == player1 and player1.colliderect(player2):
-        strike_lands = True
-    elif player == player2 and player2.colliderect(player1):
-        strike_lands = True
+    def move(self, dx, dy):
+        new_x, new_y = self.x + dx, self.y + dy
+        if MAP[new_y][new_x] != 0:  # Prevent walking into walls
+            self.x, self.y = new_x, new_y
 
-def dodge(player):
-    # Dodge mechanic: simply move the player
-    if player == player1:
-        player.x += 10  # Example movement, you can make it more complex
-    elif player == player2:
-        player.x -= 10  # Example movement, you can make it more complex
+    def draw(self):
+        pygame.draw.rect(screen, BLUE, (self.x * TILE_SIZE, self.y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
-def update_health():
-    strike_lands = False
-    global health1, health2
-    if strike_lands:
-        if player1.colliderect(player2):
-            health2 -= 10  # Player 2 gets damaged
-        elif player2.colliderect(player1):
-            health1 -= 10  # Player 1 gets damaged
+# Game loop
+def main():
+    player = Player(1, len(MAP) - 2)  # Start at bottom-left (1, second-last row)
+    clock = pygame.time.Clock()
+    running = True
+    
+    while running:
+        screen.fill(BLACK)
+        
+        # Draw map
+        for y, row in enumerate(MAP):
+            for x, tile in enumerate(row):
+                color = WHITE if tile == 1 else BLACK
+                if tile == 2:
+                    color = GREEN  # Goal
+                pygame.draw.rect(screen, color, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        
+        player.draw()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.move(-1, 0)
+                elif event.key == pygame.K_RIGHT:
+                    player.move(1, 0)
+                elif event.key == pygame.K_UP:
+                    player.move(0, -1)
+                elif event.key == pygame.K_DOWN:
+                    player.move(0, 1)
+        
+        if MAP[player.y][player.x] == 2:
+            running = False  # End game when reaching goal
+        
+        pygame.display.flip()
+        clock.tick(10)
+    
+    pygame.quit()
 
-def draw_health():
-    pygame.draw.rect(screen, GREEN, (50, 50, health1, 20))  # Player 1 health bar
-    pygame.draw.rect(screen, GREEN, (WIDTH - 150, 50, health2, 20))  # Player 2 health bar
+# if __name__ == "__main__":
+#     Game().run()
 
-# Main game loop
-while running:
-    screen.fill(BLACK)  # Clear screen
+# def main():
+#     clock = pygame.time.Clock()
+#     running = True
+#     while running:
+#         pygame.display.flip()
+#         clock.tick(60)
 
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+def start_bar_game():
+    main()  # This runs the fight scene when called
 
-    keys = pygame.key.get_pressed()  # Get the state of all keys
-
-    # Handle player controls
-    handle_controls(player1, keys)
-    handle_controls(player2, keys)
-
-    # Update health after a strike
-    update_health()
-
-    # Draw characters (you can replace these with images)
-    pygame.draw.rect(screen, RED, player1)
-    pygame.draw.rect(screen, BLUE, player2)
-
-    # Draw health bars
-    draw_health()
-
-    pygame.display.flip()  # Update the display
-    clock.tick(60)  # Limit the frame rate to 60 FPS
-
-pygame.quit()
+if __name__ == "__main__":
+    start_bar_game()
