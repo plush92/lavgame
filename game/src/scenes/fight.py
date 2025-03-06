@@ -1,13 +1,7 @@
 import pygame
 import random
-
-# Initialize Pygame
-pygame.init()
-
-# Screen settings
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Fight Scene")
+import math
+import sys
 
 # Colors
 WHITE = (255, 255, 255)
@@ -15,115 +9,141 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+GRAY = (200, 200, 200)
 
-# Fonts
-font = pygame.font.Font(None, 36)
-
-# Character settings
-CHAR_WIDTH, CHAR_HEIGHT = 50, 100
-HEALTH_BAR_WIDTH = 200
-HEALTH_BAR_HEIGHT = 20
-
+# Character class
 class Character:
-    def __init__(self, x, y, color):
-        self.rect = pygame.Rect(x, y, CHAR_WIDTH, CHAR_HEIGHT)
+    def __init__(self, x, y, color, is_player=False):
+        self.x = x
+        self.y = y
         self.color = color
+        self.width = 50
+        self.height = 50
+        self.speed = 5
         self.health = 100
+        self.is_player = is_player
+        self.punching = False
+        self.punch_timer = 0
 
-    def move_to_cursor(self, pos):
-        """ Moves the player toward the cursor position """
-        self.rect.x = pos[0] - self.rect.width // 2  # Center on cursor
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-
-    def draw_health_bar(self, screen, x, y):
-        """ Draws a health bar above the character """
-        pygame.draw.rect(screen, RED, (x, y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT))  # Background
-        pygame.draw.rect(screen, GREEN, (x, y, self.health * 2, HEALTH_BAR_HEIGHT))  # Current health
-
-class Enemy(Character):
-    def __init__(self, x, y):
-        super().__init__(x, y, RED)
-        self.direction = 1  # Move left/right
-        self.speed = 2
-
-    def move_randomly(self):
-        """ Moves left and right randomly """
-        self.rect.x += self.speed * self.direction
-        if self.rect.left < 100 or self.rect.right > WIDTH - 100:
-            self.direction *= -1  # Change direction
-
-class FightScene:
-    def __init__(self):
-        self.dialogue_active = True  # Start with dialogue
-        self.dialogue_text = "You're going down, old man!"
-        self.player = Character(200, HEIGHT - 150, GREEN)
-        self.enemy = Enemy(500, HEIGHT - 150)
-
-    def handle_events(self, events):
-        for event in events:
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if self.dialogue_active:  # If dialogue is active, disable it and start fight
-                    self.dialogue_active = False
-                else:
-                    self.punch()
-
-
-    def punch(self):
-        """ Player attacks if close enough """
-        if abs(self.player.rect.centerx - self.enemy.rect.centerx) < 60:
-            self.enemy.health -= 10
-            print("Hit!")
-
-    def update(self):
-        """ Update game logic """
-        if not self.dialogue_active:
-            self.enemy.move_randomly()
-            self.player.move_to_cursor(pygame.mouse.get_pos())
-
-            # Check win condition
-            if self.enemy.health <= 0:
-                print("You win!")
-
-    def draw(self, screen):
-        """ Render the scene """
-        screen.fill(WHITE)
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height))
         
-        if self.dialogue_active:
-            self.draw_dialogue(screen)
-        else:
-            self.player.draw(screen)
-            self.enemy.draw(screen)
-            self.player.draw_health_bar(screen, 50, 50)
-            self.enemy.draw_health_bar(screen, WIDTH - 250, 50)
+        # Draw punch effect when punching
+        if self.punching:
+            punch_color = (255, 165, 0)  # Orange
+            punch_size = 10
+            pygame.draw.rect(surface, punch_color, 
+                             (self.x + self.width, self.y, punch_size, self.height))
 
-    def draw_dialogue(self, screen):
-        """ Draws a simple dialogue box """
-        pygame.draw.rect(screen, BLACK, (100, HEIGHT - 150, 600, 100))
-        text = font.render(self.dialogue_text, True, WHITE)
-        screen.blit(text, (120, HEIGHT - 120))
+    def move_towards_mouse(self):
+        if self.is_player:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            angle = math.atan2(mouse_y - self.y, mouse_x - self.x)
+            self.x += math.cos(angle) * self.speed
+            self.y += math.sin(angle) * self.speed
 
-    def start_fight(self):
-        """ Start the fight after the dialogue """
-        self.dialogue_active = False
+    def check_collision(self, other):
+        # Simple rectangle collision
+        return (self.x < other.x + other.width and
+                self.x + self.width > other.x and
+                self.y < other.y + other.height and
+                self.y + self.height > other.y)
 
-# Game loop
 def main():
-    clock = pygame.time.Clock()
-    fight_scene = FightScene()
+    # Initialize Pygame
+    pygame.init()
 
+    # Screen setup
+    WIDTH, HEIGHT = 800, 600
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Dad Fight!")
+
+    # Game setup
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 36)
+    small_font = pygame.font.Font(None, 24)
+
+    # Create characters
+    player = Character(100, HEIGHT//2, BLUE, is_player=True)
+    dad = Character(WIDTH - 200, HEIGHT//2, RED)
+
+     # Instruction text
+    instruction_text1 = small_font.render("Move mouse to move character", True, GRAY)
+    instruction_text2 = small_font.render("Click to punch!", True, GRAY)
+
+    # Main game loop
     running = True
     while running:
-        events = pygame.event.get()
-        fight_scene.handle_events(events)
-        fight_scene.update()
-        fight_scene.draw(screen)
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            # Punch on mouse click
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                player.punching = True
+                player.punch_timer = 10  # Punch duration
+                
+                # Check if punch hits dad
+                if player.check_collision(dad):
+                    dad.health -= 20  # More damage when punching
+        
+        # Clear the screen
+        screen.fill(WHITE)
+        
+        # Move player towards mouse
+        player.move_towards_mouse()
+        
+        # Simple dad AI: move randomly
+        dad.x += random.choice([-1, 0, 1]) * dad.speed
+        dad.y += random.choice([-1, 0, 1]) * dad.speed
+        
+        # Keep characters in screen bounds
+        player.x = max(0, min(player.x, WIDTH - player.width))
+        player.y = max(0, min(player.y, HEIGHT - player.height))
+        dad.x = max(0, min(dad.x, WIDTH - dad.width))
+        dad.y = max(0, min(dad.y, HEIGHT - dad.height))
+        
+        # Collision damage
+        if player.check_collision(dad):
+            player.health -= 1  # Small damage when touching
+        
+        # Punch timer
+        if player.punch_timer > 0:
+            player.punch_timer -= 1
+        else:
+            player.punching = False
+        
+        # Draw health bars
+        pygame.draw.rect(screen, GREEN, (10, 10, player.health * 2, 20))
+        pygame.draw.rect(screen, GREEN, (WIDTH - 210, 10, dad.health * 2, 20))
+        
+        # Draw characters
+        player.draw(screen)
+        dad.draw(screen)
+
+        # Draw instruction text at the bottom
+        screen.blit(instruction_text1, (WIDTH//2 - instruction_text1.get_width()//2, HEIGHT - 50))
+        screen.blit(instruction_text2, (WIDTH//2 - instruction_text2.get_width()//2, HEIGHT - 25))
+        
+        # Game over conditions
+        if player.health <= 0 or dad.health <= 0:
+            # Display game over text
+            game_over_text = font.render("Game Over!", True, BLACK)
+            screen.blit(game_over_text, (WIDTH//2 - 100, HEIGHT//2))
+            pygame.display.flip()
+            pygame.time.wait(2000)
+            running = False
+        
+        # Update display
         pygame.display.flip()
+        
+        # Cap the frame rate
         clock.tick(60)
+
+    # Quit the game
+    pygame.quit()
+    sys.exit()
 
 def start_fight():
     main()  # This runs the fight scene when called

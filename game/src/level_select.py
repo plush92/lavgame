@@ -5,7 +5,7 @@ from src.scenes.driving import start_driving  # Import DrivingScene class
 from src.scenes.bar import start_bar_game  # Import BarScene class
 from src.scenes.date import start_date  # Import DateScene class
 from src.scenes.home import start_home  # Import HomeScene class
-# from src.scenes.end import start_end  # Import EndScene class
+from src.scenes.end import start_end  # Import EndScene class
 
 WIDTH, HEIGHT = 800, 600  # Screen size
 WINDOW_SIZE = (WIDTH, HEIGHT)  # Window size
@@ -83,6 +83,8 @@ def level_select():  # Level select function
                         start_date()
                     elif labels[i] == "Home":
                         start_home()
+                    elif labels[i] == "End":
+                        start_end()
             click = False  # Reset click after processing
 
         pygame.display.update()  # Update display
