@@ -79,8 +79,8 @@ def create_labyrinth_walls():
         
         # Lower middle section - more gaps
         pygame.Rect(150, 400, 100, 15),     # Adjusted position
-        pygame.Rect(320, 400, 80, 15),      # Shortened
-        pygame.Rect(500, 400, 70, 15),      # Shortened
+        pygame.Rect(320, 400, 140, 15),      # Shortened
+        pygame.Rect(500, 400, 35, 15),      # Shortened
         pygame.Rect(650, 400, 130, 15),
         
         # Bottom section - opened up starting area
@@ -213,7 +213,7 @@ class Bouncer:
             direct_y = 1 if player.rect.y > self.rect.y else -1 if player.rect.y < self.rect.y else 0
             
             # If stuck, try alternative routes
-            if self.stuck_timer >= 30:
+            if self.stuck_timer >= 10:
                 self.stuck_timer = 0
                 # Try a different direction from our alternatives list
                 self.current_route_index = (self.current_route_index + 1) % len(self.alternative_routes)
@@ -438,7 +438,7 @@ class Game:
         self.player.rect.y = SCREEN_HEIGHT - 40
         
         # Reset bouncer position to top right
-        self.bouncer.rect.x = SCREEN_WIDTH - 100
+        self.bouncer.rect.x = SCREEN_WIDTH - 250
         self.bouncer.rect.y = 60
         
         # Set game state to maze
@@ -520,7 +520,7 @@ class Game:
                 else:
                     # Set dialogue to indicate drinks needed
                     drinks_left = self.total_drinks - self.drinks_collected
-                    self.current_dialogue = f"Need to find {drinks_left} more drinks before leaving!"
+                    self.current_dialogue = f"Need to find {drinks_left} more items before leaving!"
                     self.dialogue_timer = 0
                     
             # Clear dialogue after a while
