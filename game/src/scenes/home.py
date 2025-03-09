@@ -145,10 +145,6 @@ def main():
     pygame.quit()
     sys.exit()
 
-# Run the game
-if __name__ == "__main__":
-    main()
-
 def start_home():
     main()  # Runs the driving scene
     import src.main_menu  # Import main menu module

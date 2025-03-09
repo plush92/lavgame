@@ -1,5 +1,6 @@
 import pygame  # Import pygame module
 import sys  # Import sys module
+from src.scenes.intro import start_intro  # Import IntroScene class
 from src.scenes.fight import start_fight  # Import FightScene class
 from src.scenes.driving import start_driving  # Import DrivingScene class
 from src.scenes.bar import start_bar_game  # Import BarScene class
@@ -73,7 +74,9 @@ def level_select():  # Level select function
             for i, button in enumerate(buttons):
                 if button.collidepoint((mx, my)):
                     print(f"{labels[i]} clicked")  # Print button name when clicked
-                    if labels[i] == "Fight":
+                    if labels[i] == "Intro":
+                        start_intro()
+                    elif labels[i] == "Fight":
                         start_fight()
                     elif labels[i] == "Driving":
                         start_driving()

@@ -30,7 +30,7 @@ def main_menu():
 
         # Text inside buttons
         button_font = pygame.font.Font(None, 30)
-        button_1_text = button_font.render("Start Game", True, (255, 255, 255))
+        button_1_text = button_font.render("Start", True, (255, 255, 255))
         button_2_text = button_font.render("Exit", True, (255, 255, 255))
         button_3_text = button_font.render("Level Select", True, (255, 255, 255))
         screen.blit(button_1_text, (WIDTH // 2 - 50, HEIGHT // 2 + 15))
