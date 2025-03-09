@@ -1,5 +1,6 @@
 import pygame
 import time
+from src.scene_wait_for_continue import scene_wait_for_continue
 
 def fade_text(screen, text, font, color, background, duration=1, fade_speed=7):
     text_surface = font.render(text, True, color)
@@ -41,10 +42,14 @@ def game_intro():
     black = (0, 0, 0)
     
     fade_text(screen, "for your birthday...", font, black, pale_pink)
-    fade_text(screen, "a journey...", font, black, pale_pink)
+    fade_text(screen, "our journey...", font, black, pale_pink)
     fade_out(screen, pale_pink)
+
+    result = scene_wait_for_continue()
     
-    pygame.quit()
+    if result == "continue":
+        from src.scenes.fight import start_fight  # Import FightScene class  # Import the fight scene module
+        start_fight()  # Start the fight scene
 
 def start_intro():
     game_intro()  # Runs the driving scene

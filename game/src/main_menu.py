@@ -1,6 +1,13 @@
 import pygame
 import sys
 from src.level_select import level_select
+from src.scenes.intro import start_intro  # Import IntroScene class
+from src.scenes.fight import start_fight  # Import FightScene class
+from src.scenes.driving import start_driving  # Import DrivingScene class
+from src.scenes.bar import start_bar_game  # Import BarScene class
+from src.scenes.date import start_date  # Import DateScene class
+from src.scenes.home import start_home  # Import HomeScene class
+from src.scenes.end import start_end  # Import EndScene class
 
 WIDTH, HEIGHT = 800, 600
 WINDOW_SIZE = (WIDTH, HEIGHT)
@@ -66,16 +73,29 @@ def main_menu():
         clock.tick(60)
 
 def game():
-    running = True
-    while running:
-        screen.fill((0, 0, 255))  # Blue background for the game scene
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    scenes = [
+        start_intro,
+        start_fight,
+        start_driving,
+        start_bar_game,
+        start_date,
+        start_home,
+        start_end
+    ]
+
+    for scene in scenes:
+        while True:  # Loop until a valid response is received
+            result = scene()
+
+            if result == "continue":  # Move to the next scene
+                break
+            elif result == "menu":  # Return to main menu
+                main_menu()
+                return
+            elif result == "exit":  # Quit the game
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False  # Return to main menu
-        
-        pygame.display.update()
-        clock.tick(60)
+
+    main_menu()  # When all scenes finish, go back to menu
+
+
