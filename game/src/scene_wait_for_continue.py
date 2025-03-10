@@ -66,11 +66,10 @@ def scene_wait_for_continue():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:  # Mouse click event
                 if continue_button.collidepoint(event.pos):
-                    return "continue"
+                    return
                 if main_menu_button.collidepoint(event.pos):
                     from src.main_menu import main_menu  # Call main menu function
                     main_menu()
-                    return "main_menu"
                 if exit_button.collidepoint(event.pos):
                     pygame.quit()
                     exit()

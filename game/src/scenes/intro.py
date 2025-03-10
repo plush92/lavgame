@@ -41,8 +41,11 @@ def game_intro():
     pale_pink = (255, 228, 225)
     black = (0, 0, 0)
     
-    fade_text(screen, "for your birthday...", font, black, pale_pink)
-    fade_text(screen, "our journey...", font, black, pale_pink)
+    fade_text(screen, "Oh...hi Tim", font, black, pale_pink)
+    fade_text(screen, "I was wondering how to celebrate the man who has everything on his birthday….. ", font, black, pale_pink)
+    fade_text(screen, "And i thought maybe the best gift would be… ", font, black, pale_pink)
+    fade_text(screen, "...us", font, black, pale_pink)
+
     fade_out(screen, pale_pink)
 
     result = scene_wait_for_continue()
@@ -52,7 +55,7 @@ def game_intro():
         start_fight()  # Start the fight scene
 
 def start_intro():
-    game_intro()  # Runs the driving scene
+    game_intro()
     import src.main_menu  # Import main menu module
     src.main_menu.main_menu()  # Call the main menu again
 

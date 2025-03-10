@@ -4,7 +4,7 @@ from src.level_select import level_select
 from src.scenes.intro import start_intro  # Import IntroScene class
 from src.scenes.fight import start_fight  # Import FightScene class
 from src.scenes.driving import start_driving  # Import DrivingScene class
-from src.scenes.bar import start_bar_game  # Import BarScene class
+from src.scenes.bar import start_bar  # Import BarScene class
 from src.scenes.date import start_date  # Import DateScene class
 from src.scenes.home import start_home  # Import HomeScene class
 from src.scenes.end import start_end  # Import EndScene class
@@ -76,9 +76,9 @@ def game():
     scenes = [
         start_intro,
         start_fight,
-        start_driving,
-        start_bar_game,
+        start_bar,
         start_date,
+        start_driving,
         start_home,
         start_end
     ]

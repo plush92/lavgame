@@ -553,9 +553,9 @@ class Game:
 
         pygame.quit()
 
-def start_bar_game():
+def start_bar():
     game = Game()
     game.run()
 
 if __name__ == "__main__":
-    start_bar_game()
+    start_bar()
