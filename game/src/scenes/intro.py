@@ -2,14 +2,20 @@ import pygame
 import time
 from src.scene_wait_for_continue import scene_wait_for_continue
 
-def fade_text(screen, text, font, color, background, duration=1, fade_speed=7):
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+def fade_text(screen, text, font, color, background, duration=2, fade_speed=6):
+    lines = text.split('\n')  # Split the text into multiple lines
+    line_height = font.get_height()  # Get the height of each line
     
     for alpha in range(0, 256, fade_speed):
         screen.fill(background)
-        text_surface.set_alpha(alpha)
-        screen.blit(text_surface, text_rect)
+        
+        # Render each line and adjust the vertical position
+        for i, line in enumerate(lines):
+            text_surface = font.render(line, True, color)
+            text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + i * line_height))
+            text_surface.set_alpha(alpha)
+            screen.blit(text_surface, text_rect)
+        
         pygame.display.update()
         pygame.time.delay(30)
     
@@ -17,8 +23,14 @@ def fade_text(screen, text, font, color, background, duration=1, fade_speed=7):
     
     for alpha in range(255, -1, -fade_speed):
         screen.fill(background)
-        text_surface.set_alpha(alpha)
-        screen.blit(text_surface, text_rect)
+        
+        # Render each line again during fade-out
+        for i, line in enumerate(lines):
+            text_surface = font.render(line, True, color)
+            text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + i * line_height))
+            text_surface.set_alpha(alpha)
+            screen.blit(text_surface, text_rect)
+        
         pygame.display.update()
         pygame.time.delay(30)
 
@@ -38,15 +50,15 @@ def game_intro():
     pygame.display.set_caption("Game Intro")
     
     font = pygame.font.Font(None, 50)
-    pale_pink = (255, 228, 225)
+    background_color = (155, 228, 225)
     black = (0, 0, 0)
     
-    fade_text(screen, "Oh...hi Tim", font, black, pale_pink)
-    fade_text(screen, "I was wondering how to celebrate the man who has everything on his birthday….. ", font, black, pale_pink)
-    fade_text(screen, "And i thought maybe the best gift would be… ", font, black, pale_pink)
-    fade_text(screen, "...us", font, black, pale_pink)
+    fade_text(screen, "Oh...hi Tim", font, black, background_color)
+    fade_text(screen, "I was wondering how to celebrate the man\n who has everything on his birthday….. ", font, black, background_color)
+    fade_text(screen, "And I thought maybe the best gift would be… ", font, black, background_color)
+    fade_text(screen, "us", font, black, background_color)
 
-    fade_out(screen, pale_pink)
+    fade_out(screen, background_color)
 
     result = scene_wait_for_continue()
     
