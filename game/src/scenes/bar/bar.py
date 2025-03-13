@@ -10,7 +10,7 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Bar Escape: Labyrinth")
+pygame.display.set_caption("Bar Escape: Hometown Honkey Tonk")
 
 # Colors
 BLACK = (0, 0, 0)
@@ -20,6 +20,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BROWN = (139, 69, 19)
 BLUE = (0, 0, 255)
+PINK = (255, 105, 180)
+YELLOW = (255, 255, 0)
 
 # Define a more complex labyrinth but with more openings
 def create_labyrinth_walls():
@@ -111,6 +113,7 @@ class Player:
         self.max_drunk_level = 3
         self.recovering = False
         self.recovery_timer = 0
+        self.name = "Tim"
 
     def move(self):
         if self.recovering:
@@ -301,14 +304,16 @@ class Bouncer:
         # Store current position for stuck detection
         self.last_position = (self.rect.x, self.rect.y)
 
-class Drink:
-    def __init__(self, x, y):
+class Collectable:
+    def __init__(self, x, y, type_name, color):
         self.rect = pygame.Rect(x, y, 15, 15)
         self.collected = False
+        self.type = type_name
+        self.color = color
     
     def draw(self, screen):
         if not self.collected:
-            pygame.draw.rect(screen, BLUE, self.rect)
+            pygame.draw.rect(screen, self.color, self.rect)
 
 
 class Game:
@@ -327,29 +332,31 @@ class Game:
         self.game_state = 'bar'
         self.drink_count = 0
         self.dialogue = [
-            "Another rough day...",
-            "Why does everything suck?",
-            "I need another drink...",
-            "Life is just... complicated."
+            f"{self.player.name}: what a great night… I wonder if there any hometown Honkey tonk skanks I can leave this bar with…",
+            f"{self.player.name}: Wow, I've had a lot to drink",
+            f"{self.player.name}: Oh no… Where is my fanny pack?"
         ]
-        self.current_dialogue = None
+        self.current_dialogue = self.dialogue[0]
+        self.dialogue_index = 0
         self.dialogue_timer = 0
         self.maze_start_time = None
         
-        # Add drinks to collect in the maze - better spread across the maze
-        self.drinks = [
-            Drink(150, 150),
-            Drink(350, 250),
-            Drink(550, 350),
-            Drink(250, 450),
-            Drink(650, 150)
+        # Add fanny pack and hometown skanks to collect
+        self.collectables = [
+            Collectable(150, 150, "fanny_pack", YELLOW),
+            Collectable(350, 250, "skank", PINK),
+            Collectable(550, 350, "skank", PINK),
+            Collectable(250, 450, "skank", PINK)
         ]
-        self.drinks_collected = 0
-        self.total_drinks = len(self.drinks)
+        
+        # Tracking what's been collected
+        self.fanny_pack_collected = False
+        self.skanks_collected = 0
+        self.total_skanks = 3
         
         # Add a timer for the maze
         self.maze_timer = 0
-        self.time_limit = 90  # Increased to 90 seconds to allow more exploration time
+        self.time_limit = 90  # 90 seconds to complete the challenge
 
     def draw(self, screen):
         screen.fill(BLACK)
@@ -358,14 +365,19 @@ class Game:
             # Bar background
             screen.fill(BROWN)
             
+            # Draw the player
+            pygame.draw.rect(screen, WHITE, self.player.rect)
+            
             # Render drink prompt
             drink_text = font.render("Press SPACE to drink", True, WHITE)
             screen.blit(drink_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2))
 
             # Render dialogue
             if self.current_dialogue:
+                dialogue_bg = pygame.Rect(20, SCREEN_HEIGHT - 50, SCREEN_WIDTH - 40, 30)
+                pygame.draw.rect(screen, BLACK, dialogue_bg)
                 dialogue_render = small_font.render(self.current_dialogue, True, WHITE)
-                screen.blit(dialogue_render, (50, SCREEN_HEIGHT - 50))
+                screen.blit(dialogue_render, (30, SCREEN_HEIGHT - 45))
 
         elif self.game_state == 'maze':
             # Draw walls
@@ -375,10 +387,10 @@ class Game:
             # Draw exit
             pygame.draw.rect(screen, GREEN, self.exit)
             
-            # Draw drinks
-            for drink in self.drinks:
-                if not drink.collected:
-                    drink.draw(screen)
+            # Draw collectables
+            for item in self.collectables:
+                if not item.collected:
+                    item.draw(screen)
 
             # Draw player
             pygame.draw.rect(screen, WHITE, self.player.rect)
@@ -399,9 +411,17 @@ class Game:
             time_text = font.render(f"Time: {time_left}s", True, WHITE)
             screen.blit(time_text, (30, 30))
             
-            # Draw drinks collected counter
-            drinks_text = font.render(f"Drinks: {self.drinks_collected}/{self.total_drinks}", True, BLUE)
-            screen.blit(drinks_text, (SCREEN_WIDTH - 150, 30))
+            # Draw collection status
+            status_text = ""
+            if not self.fanny_pack_collected:
+                status_text += "Fanny Pack: Missing | "
+            else:
+                status_text += "Fanny Pack: Found | "
+            
+            status_text += f"Skanks: {self.skanks_collected}/{self.total_skanks}"
+            
+            status_render = small_font.render(status_text, True, WHITE)
+            screen.blit(status_render, (SCREEN_WIDTH - 280, 30))
             
             # Draw current dialogue if any
             if self.current_dialogue:
@@ -422,6 +442,12 @@ class Game:
                     self.drink_count += 1
                     self.player.drunk_level = min(self.player.drunk_level + 0.5, 
                                                   self.player.max_drunk_level)
+                    
+                    # Update dialogue after each drink
+                    if self.dialogue_index < len(self.dialogue) - 1:
+                        self.dialogue_index += 1
+                        self.current_dialogue = self.dialogue[self.dialogue_index]
+                        self.dialogue_timer = 0
                     
                     if self.drink_count >= 3:
                         # Transition to maze
@@ -448,43 +474,47 @@ class Game:
         self.maze_start_time = time.time()
         
         # Set initial dialogue
-        self.current_dialogue = "Last call! Time to go! Collect your belongings!"
+        self.current_dialogue = "Find your fanny pack and collect the hometown skanks before the bouncer gets you!"
         self.dialogue_timer = 0
         
         # Reset maze timer
         self.maze_timer = 0
         
-        # Reset drinks collected
-        self.drinks_collected = 0
-        for drink in self.drinks:
-            drink.collected = False
+        # Reset collection status
+        self.fanny_pack_collected = False
+        self.skanks_collected = 0
 
-    def check_drink_collisions(self):
-        for drink in self.drinks:
-            if not drink.collected and self.player.rect.colliderect(drink.rect):
-                drink.collected = True
-                self.drinks_collected += 1
-                # Drunk effect increases with each drink collected
-                self.player.drunk_level = min(self.player.drunk_level + 0.3, 
+    def check_collectable_collisions(self):
+        for item in self.collectables:
+            if not item.collected and self.player.rect.colliderect(item.rect):
+                item.collected = True
+                
+                if item.type == "fanny_pack":
+                    self.fanny_pack_collected = True
+                    self.current_dialogue = "Found your fanny pack! Now find the hometown skanks!"
+                elif item.type == "skank":
+                    self.skanks_collected += 1
+                    if self.skanks_collected < self.total_skanks:
+                        self.current_dialogue = f"Found a hometown skank! {self.total_skanks - self.skanks_collected} more to go!"
+                    else:
+                        self.current_dialogue = "You've found all the hometown skanks! Head to the exit!"
+                        
+                # Increase drunk effect slightly with each item collected
+                self.player.drunk_level = min(self.player.drunk_level + 0.2, 
                                             self.player.max_drunk_level)
-                # Show message when drink is collected
-                if self.drinks_collected < self.total_drinks:
-                    drinks_left = self.total_drinks - self.drinks_collected
-                    self.current_dialogue = f"Got one! {drinks_left} more drinks to find!"
-                else:
-                    self.current_dialogue = "Got all drinks! Head to the exit!"
+                
                 self.dialogue_timer = 0
 
     def update(self):
         if self.game_state == 'bar':
-            # Dialogue system
-            if not self.current_dialogue and random.random() < 0.02:
-                self.current_dialogue = random.choice(self.dialogue)
-            
+            # Update dialogue timer
             if self.current_dialogue:
                 self.dialogue_timer += 1
                 if self.dialogue_timer > 180:  # 3 seconds
-                    self.current_dialogue = None
+                    # Don't clear the last dialogue about the fanny pack
+                    if self.dialogue_index < len(self.dialogue) - 1:
+                        self.dialogue_index += 1
+                        self.current_dialogue = self.dialogue[self.dialogue_index]
                     self.dialogue_timer = 0
 
         elif self.game_state == 'maze':
@@ -499,11 +529,13 @@ class Game:
             if self.maze_start_time and not self.bouncer.can_move:
                 if time.time() - self.maze_start_time >= 5:
                     self.bouncer.start_moving()
+                    self.current_dialogue = "The bouncer is after you! Hurry!"
+                    self.dialogue_timer = 0
 
             self.player.move()
             
-            # Check for drink collisions
-            self.check_drink_collisions()
+            # Check for collectable collisions
+            self.check_collectable_collisions()
             
             # Move bouncer
             if self.bouncer.can_move:
@@ -513,15 +545,22 @@ class Game:
             if self.player.rect.colliderect(self.bouncer.rect):
                 self.game_over("The bouncer caught you!")
 
-            # Check exit - only allow exit if all drinks collected
+            # Check exit - only allow exit if fanny pack and all skanks collected
             if self.player.rect.colliderect(self.exit):
-                if self.drinks_collected >= self.total_drinks:
+                if self.fanny_pack_collected and self.skanks_collected >= self.total_skanks:
                     self.win_game()
                 else:
-                    # Set dialogue to indicate drinks needed
-                    drinks_left = self.total_drinks - self.drinks_collected
-                    self.current_dialogue = f"Need to find {drinks_left} more items before leaving!"
-                    self.dialogue_timer = 0
+                    # Set dialogue to indicate what's still needed
+                    missing_items = []
+                    if not self.fanny_pack_collected:
+                        missing_items.append("fanny pack")
+                    if self.skanks_collected < self.total_skanks:
+                        missing_items.append(f"{self.total_skanks - self.skanks_collected} hometown skanks")
+                    
+                    if missing_items:
+                        item_list = " and ".join(missing_items)
+                        self.current_dialogue = f"You still need to find your {item_list}!"
+                        self.dialogue_timer = 0
                     
             # Clear dialogue after a while
             if self.current_dialogue:
@@ -537,7 +576,7 @@ class Game:
 
     def win_game(self):
         time_taken = int(self.maze_timer)
-        print(f"Congratulations! You escaped in {time_taken} seconds!")
+        print(f"Congratulations! You escaped with your fanny pack and {self.skanks_collected} hometown skanks in {time_taken} seconds!")
         pygame.quit()
         sys.exit()
 
