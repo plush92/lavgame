@@ -1,140 +1,105 @@
 import pygame
 import random
-import sys
-import time
-from src.scenes.bar.walls import create_labyrinth_walls
+import heapq
 
 # Screen Setup
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Bar Escape: Hometown Honkey Tonk")
-# Create the walls
-WALLS = create_labyrinth_walls()
+
+# Define directions for A* algorithm (4 directions + diagonal)
+DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
 class Bouncer:
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, 20, 20)
-        self.speed = 1.5  # Increased base speed for better pursuit
+        self.speed = 1.4
         self.can_move = False
-        self.move_start_time = None
         self.path_finding_timer = 0
         self.stuck_timer = 0
         self.last_position = (x, y)
-        self.path_direction = None
-        self.alternative_routes = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-        self.current_route_index = 0
-        self.route_attempt_time = 0
+        self.path = []  # A* path
+        self.path_index = 0  # Keeps track of the current point in the A* path
 
     def start_moving(self):
         self.can_move = True
-        self.move_start_time = time.time()
+
+    def heuristic(self, current, target):
+        """Manhattan distance heuristic (could be Euclidean for diagonal efficiency)"""
+        return abs(current[0] - target[0]) + abs(current[1] - target[1])
+
+    def a_star(self, start, goal, walls):
+        """A* algorithm for pathfinding"""
+        open_list = []
+        closed_list = set()
+        heapq.heappush(open_list, (0 + self.heuristic(start, goal), 0, start))  # (f, g, pos)
+        g_costs = {start: 0}
+        came_from = {}
+
+        while open_list:
+            _, g, current = heapq.heappop(open_list)
+
+            if current == goal:
+                path = []
+                while current in came_from:
+                    path.append(current)
+                    current = came_from[current]
+                path.reverse()
+                return path
+
+            closed_list.add(current)
+            for direction in DIRECTIONS:
+                neighbor = (current[0] + direction[0], current[1] + direction[1])
+                if neighbor in closed_list or not self.is_passable(neighbor, walls):
+                    continue
+                tentative_g = g + 1  # Assuming uniform cost for all moves
+                if neighbor not in g_costs or tentative_g < g_costs[neighbor]:
+                    g_costs[neighbor] = tentative_g
+                    f_cost = tentative_g + self.heuristic(neighbor, goal)
+                    heapq.heappush(open_list, (f_cost, tentative_g, neighbor))
+                    came_from[neighbor] = current
+        return []  # No path found
+
+    def is_passable(self, position, walls):
+        """Checks if a position is within bounds and not colliding with any walls"""
+        x, y = position
+        if x < 0 or x >= SCREEN_WIDTH or y < 0 or y >= SCREEN_HEIGHT:
+            return False
+        return not any(pygame.Rect(x, y, 20, 20).colliderect(w) for w in walls)
 
     def move_towards_player(self, player, walls):
         if not self.can_move:
             return
 
-        # Check if bouncer is stuck
         current_pos = (self.rect.x, self.rect.y)
-        if abs(current_pos[0] - self.last_position[0]) < 2 and abs(current_pos[1] - self.last_position[1]) < 2:
-            self.stuck_timer += 1
-        else:
-            self.stuck_timer = 0
-            
-        # Update pathfinding direction periodically or when stuck
         self.path_finding_timer += 1
-        if self.path_finding_timer >= 60 or self.stuck_timer >= 30:  # Update direction every second or when stuck
-            self.path_finding_timer = 0
-            
-            # Calculate direct direction to player
-            direct_x = 1 if player.rect.x > self.rect.x else -1 if player.rect.x < self.rect.x else 0
-            direct_y = 1 if player.rect.y > self.rect.y else -1 if player.rect.y < self.rect.y else 0
-            
-            # If stuck, try alternative routes
-            if self.stuck_timer >= 10:
-                self.stuck_timer = 0
-                # Try a different direction from our alternatives list
-                self.current_route_index = (self.current_route_index + 1) % len(self.alternative_routes)
-                self.path_direction = self.alternative_routes[self.current_route_index]
-                self.route_attempt_time = time.time()
-            else:
-                # Prioritize the larger distance axis
-                x_dist = abs(player.rect.x - self.rect.x)
-                y_dist = abs(player.rect.y - self.rect.y)
-                
-                if x_dist > y_dist:
-                    self.path_direction = (direct_x, 0)
-                else:
-                    self.path_direction = (0, direct_y)
-        
-        # If we've been trying an alternative route for too long, go back to direct pursuit
-        if self.path_direction in self.alternative_routes and time.time() - self.route_attempt_time > 1.5:
-            # Calculate direct direction to player
-            direct_x = 1 if player.rect.x > self.rect.x else -1 if player.rect.x < self.rect.x else 0
-            direct_y = 1 if player.rect.y > self.rect.y else -1 if player.rect.y < self.rect.y else 0
-            
-            x_dist = abs(player.rect.x - self.rect.x)
-            y_dist = abs(player.rect.y - self.rect.y)
-            
-            if x_dist > y_dist:
-                self.path_direction = (direct_x, 0)
-            else:
-                self.path_direction = (0, direct_y)
 
-        # Apply movement based on current path direction
-        dx, dy = 0, 0
-        if self.path_direction:
-            dx = self.path_direction[0] * self.speed
-            dy = self.path_direction[1] * self.speed
-        
-        # Try to move horizontally
-        if dx != 0:
-            proposed_rect = self.rect.copy()
-            proposed_rect.x += dx
-            
-            collision = False
-            for wall in walls:
-                if proposed_rect.colliderect(wall):
-                    collision = True
-                    break
-                    
-            if not collision:
-                self.rect.x += dx
-            else:
-                # If horizontal movement is blocked, try vertical
-                self.path_direction = (0, 1 if player.rect.y > self.rect.y else -1)
-                        
-        # Try to move vertically
-        if dy != 0:
-            proposed_rect = self.rect.copy()
-            proposed_rect.y += dy
-            
-            collision = False
-            for wall in walls:
-                if proposed_rect.colliderect(wall):
-                    collision = True
-                    break
-                    
-            if not collision:
-                self.rect.y += dy
-            else:
-                # If vertical movement is blocked, try horizontal
-                self.path_direction = (1 if player.rect.x > self.rect.x else -1, 0)
-                
-        # Keep bouncer in screen bounds and handle boundary collisions
-        if self.rect.left < 20:
-            self.rect.left = 20
-            self.path_direction = (1, 0)  # Move right
-        elif self.rect.right > SCREEN_WIDTH - 20:
-            self.rect.right = SCREEN_WIDTH - 20
-            self.path_direction = (-1, 0)  # Move left
-            
-        if self.rect.top < 20:
-            self.rect.top = 20
-            self.path_direction = (0, 1)  # Move down
-        elif self.rect.bottom > SCREEN_HEIGHT - 20:
-            self.rect.bottom = SCREEN_HEIGHT - 20
-            self.path_direction = (0, -1)  # Move up
-        
-        # Store current position for stuck detection
+        if self.path_finding_timer >= 30 or self.stuck_timer >= 10:
+            self.path_finding_timer = 0
+
+            start = (self.rect.x, self.rect.y)
+            goal = (player.rect.x, player.rect.y)
+
+            # Perform A* to get a path to the player
+            self.path = self.a_star(start, goal, walls)
+            self.path_index = 0
+
+        # Follow the next point in the path
+        if self.path and self.path_index < len(self.path):
+            next_point = self.path[self.path_index]
+            dx = next_point[0] - self.rect.x
+            dy = next_point[1] - self.rect.y
+
+            # Move towards the next point on the path
+            self.rect.x += (dx / max(1, abs(dx))) * self.speed
+            self.rect.y += (dy / max(1, abs(dy))) * self.speed
+
+            if abs(dx) < 2 and abs(dy) < 2:
+                self.path_index += 1  # Move to the next point in the path
+
+        # Ensure the bouncer stays within screen bounds
+        self.rect.clamp_ip(pygame.Rect(20, 20, SCREEN_WIDTH - 40, SCREEN_HEIGHT - 40))
+
         self.last_position = (self.rect.x, self.rect.y)
+
