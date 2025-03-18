@@ -38,19 +38,25 @@ DARK_GRAY = (50, 50, 50)
 
 # Fonts
 font = pygame.font.SysFont(None, 36)
-small_font = pygame.font.SysFont(None, 24)
+small_font = pygame.font.SysFont(None, 22)
+player_bar_area_start_x = SCREEN_WIDTH // 2
+player_bar_area_start_y = SCREEN_HEIGHT // 2
+player_maze_start_x = 150
+player_maze_start_y = 150
 
 class Game:
     def __init__(self):
         # Start player in the bar area
-        self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.player = Player(player_bar_area_start_x, player_bar_area_start_y)
         
         # Create walls
         self.walls = WALLS
-        self.exit = pygame.Rect(SCREEN_WIDTH - 50, SCREEN_HEIGHT - 50, 30, 30)
+        print(f"Walls count: {len(self.walls)}")
+        print(f"First wall type: {type(self.walls[0])}")
+        self.exit = pygame.Rect(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, 30, 30)
         
         # Place bouncer at a different location
-        self.bouncer = Bouncer(SCREEN_WIDTH - 100, 60)
+        self.bouncer = Bouncer(SCREEN_WIDTH - 100, 100)
         
         # Game state and dialogue setup
         self.game_state = 'bar'
@@ -193,11 +199,11 @@ class Game:
                 pygame.draw.rect(screen, GOLD, drink_rect)
             
             # Render drink prompt in a box
-            prompt_box = pygame.Rect(SCREEN_WIDTH // 2 - 120, SCREEN_HEIGHT // 2 - 20, 240, 40)
-            pygame.draw.rect(screen, BLACK, prompt_box)
+            prompt_box = pygame.Rect(SCREEN_WIDTH // 2 + 140, SCREEN_HEIGHT // 2 - 250, 260, 50)
+            pygame.draw.rect(screen, GREEN, prompt_box)
             pygame.draw.rect(screen, WHITE, prompt_box, 2)
-            drink_text = font.render("Press SPACE to drink", True, WHITE)
-            screen.blit(drink_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 10))
+            drink_text = font.render("Press SPACE to drink", True, BLACK)
+            screen.blit(drink_text, (SCREEN_WIDTH // 2 + 145, SCREEN_HEIGHT // 2 - 240))
 
             # Render dialogue box at bottom
             if self.current_dialogue:
@@ -213,7 +219,9 @@ class Game:
                 pygame.draw.rect(screen, GRAY, wall)
 
             # Draw exit
-            pygame.draw.rect(screen, GREEN, self.exit)
+            exit_image = pygame.image.load("assets/exit.png")
+            scaled_exit_image = pygame.transform.scale(exit_image, (30, 30))
+            screen.blit(scaled_exit_image, (self.exit.x, self.exit.y))
             
             # Draw collectables
             for item in self.collectables:
@@ -221,6 +229,7 @@ class Game:
                     item.draw(screen)
 
             # Draw player
+            # surface, color, rect, width
             pygame.draw.rect(screen, WHITE, self.player.rect)
 
             # Draw bouncer
@@ -253,11 +262,11 @@ class Game:
             
             # Draw current dialogue if any
             if self.current_dialogue:
-                dialogue_bg = pygame.Rect(20, SCREEN_HEIGHT - 70, SCREEN_WIDTH - 40, 50)
-                pygame.draw.rect(screen, BLACK, dialogue_bg)
+                dialogue_bg = pygame.Rect(20, SCREEN_HEIGHT - 50, SCREEN_WIDTH - 100, 50)
+                pygame.draw.rect(screen, GOLD, dialogue_bg)
                 pygame.draw.rect(screen, WHITE, dialogue_bg, 2)
-                dialogue_render = small_font.render(self.current_dialogue, True, WHITE)
-                screen.blit(dialogue_render, (30, SCREEN_HEIGHT - 50))
+                dialogue_render = small_font.render(self.current_dialogue, True, RED)
+                screen.blit(dialogue_render, (30, SCREEN_HEIGHT - 30))
         
         elif self.game_state == 'game_over':
             # Draw game over screen
@@ -338,8 +347,8 @@ class Game:
 
     def transition_to_maze(self):
         # Reset player position to bottom left of maze
-        self.player.rect.x = 40
-        self.player.rect.y = SCREEN_HEIGHT - 40
+        self.player.rect.x = SCREEN_WIDTH//2 - 60
+        self.player.rect.y = SCREEN_HEIGHT//2 + 60
         
         # Reset bouncer position to top right
         self.bouncer.rect.x = SCREEN_WIDTH - 250
