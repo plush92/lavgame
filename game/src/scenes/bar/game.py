@@ -2,6 +2,7 @@ import pygame
 import random
 import sys
 import time
+import math
 from src.scenes.bar.walls import create_labyrinth_walls
 from src.scenes.bar.player import Player
 from src.scenes.bar.bouncer import Bouncer
@@ -62,7 +63,7 @@ class Game:
         self.game_state = 'bar'
         self.drink_count = 0
         self.dialogue = [
-            f"{self.player.name}: what a great night… I wonder if there any hometown Honkey tonk skanks I can leave this bar with…",
+            f"{self.player.name}: what a great night… I wonder if there's any hometown honkey tonk skanks I can leave this bar with…",
             f"{self.player.name}: Wow, I've had a lot to drink",
             f"{self.player.name}: Oh no… Where is my fanny pack?"
         ]
@@ -353,6 +354,42 @@ class Game:
         # Reset bouncer position to top right
         self.bouncer.rect.x = SCREEN_WIDTH - 250
         self.bouncer.rect.y = 60
+        
+        # Visual transition effect - screen spin and blur to simulate drunkenness
+        original_screen = screen.copy()
+        max_spin = 10  # max rotation in degrees
+        
+        for i in range(30):  # 30 frames of transition
+            # Clear screen
+            screen.fill(BLACK)
+            
+            # Create spin effect
+            spin_amount = (i / 30.0) * max_spin
+            
+            # Simple blur/rotation approximation
+            for offset in range(-3, 4, 2):
+                offset_surface = original_screen.copy()
+                # Darken the copy slightly
+                dark = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                dark.fill((0, 0, 0, 10))  # Slight transparency
+                offset_surface.blit(dark, (0, 0))
+                
+                # Calculate rotated position
+                angle = math.radians(spin_amount + offset)
+                dx = math.sin(angle) * 5
+                dy = math.cos(angle) * 5
+                
+                # Blit with offset for blur effect
+                screen.blit(offset_surface, (dx, dy))
+            
+            # Add text overlay
+            if i > 15:
+                text = font.render("Finding your way out...", True, WHITE)
+                text_rect = text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+                screen.blit(text, text_rect)
+            
+            pygame.display.flip()
+            pygame.time.delay(50)  # 50ms delay (20fps)
         
         # Set game state to maze
         self.game_state = 'maze'

@@ -1,14 +1,15 @@
-import pygame
-
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 # Rect parameters:
     # x (int) – The x-coordinate of the top-left corner.
     # y (int) – The y-coordinate of the top-left corner.
     # width (int) – The width of the rectangle.
     # height (int) – The height of the rectangle.
     #ex. - (100, 60, 15, 100) - x=100, y=60, width=15, height=100
+import pygame
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
 
 # Define a more complex labyrinth but with more openings
 def create_labyrinth_walls():

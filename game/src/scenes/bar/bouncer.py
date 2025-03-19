@@ -12,7 +12,7 @@ class Bouncer:
     def __init__(self, x, y):
         """Initialize the bouncer character."""
         self.rect = pygame.Rect(x, y, 20, 20) # initialize bouncer location
-        self.speed = 1.2 # speed
+        self.speed = 1.5 # speed
         self.can_move = False
         self.stuck_timer = 0
         self.last_position = (x, y)

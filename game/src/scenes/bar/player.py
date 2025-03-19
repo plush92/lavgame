@@ -24,7 +24,7 @@ class Player:
 
     def move(self):
         if self.recovering:
-            if time.time() - self.recovery_timer >= 0:
+            if time.time() - self.recovery_timer >= 0.3:
                 self.recovering = False
             else:
                 return
