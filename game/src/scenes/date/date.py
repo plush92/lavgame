@@ -101,7 +101,7 @@ class DatingApp:
             "Are you sure?",
             "Ok... seriously? This does not look like a good idea.",
             "Bud, as your friend this is kinda crazy....",
-            "This behavior is self-destructive and has a 4%/ chance of ending well for you.",
+            "This behavior is self-destructive and has a 4% chance of ending well for you.",
             "Ok...."
         ]
         
