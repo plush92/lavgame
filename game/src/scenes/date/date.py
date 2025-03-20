@@ -91,9 +91,9 @@ class DatingApp:
         
         # Final decision buttons
         self.decision_buttons = [
-            pygame.Rect(350, 470, 100, 50),  # Fixed position for "I know" button
-            pygame.Rect(350, 470, 100, 50),  # Fixed position for "I know" (2nd time)
-            pygame.Rect(350, 470, 100, 50)   # Fixed position for "I'm a god"
+            pygame.Rect(350, 420, 100, 50),  # Fixed position for "I know" button
+            pygame.Rect(350, 420, 100, 50),  # Fixed position for "I know" (2nd time)
+            pygame.Rect(350, 420, 100, 50)   # Fixed position for "I'm a god"
         ]
         
         # Create warning messages
