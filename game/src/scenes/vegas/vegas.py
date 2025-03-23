@@ -3,6 +3,10 @@ import sys
 import random
 import time
 from pygame.math import Vector2
+from src.scenes.vegas.brick import Brick
+from src.scenes.vegas.paper import Paper
+from src.scenes.vegas.player import Player
+from src.scenes.vegas.wall import Wall
 
 # Initialize pygame
 pygame.init()
@@ -50,6 +54,12 @@ class Character:
 # Create characters
 tim = Character("Tim", WIDTH * 0.3, HEIGHT * 0.5, BLUE)
 lav = Character("Lav", WIDTH * 0.7, HEIGHT * 0.5, RED)
+# Create wall and player
+brick = Brick(WIDTH//2 - 50, HEIGHT//2 - 100, 100, 200)
+paper = Paper()
+player = Player()
+wall = Wall()
+papers = []
 
 # Dialogue system
 dialogues = [
@@ -61,185 +71,7 @@ dialogues = [
 ]
 current_dialogue = 0
 dialogue_timer = 0
-DIALOGUE_SPEED = 1500  # milliseconds
-
-# Wall Breaking Game
-class Brick:
-    def __init__(self, x, y, width, height):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.health = 100
-        self.cracked = False
-        
-    def hit(self, damage):
-        self.health -= damage
-        if self.health <= 50:
-            self.cracked = True
-        return self.health <= 0
-        
-    def draw(self):
-        if self.cracked:
-            pygame.draw.rect(screen, (120, 30, 30), self.rect)
-            # Draw crack lines
-            start_pos = (self.rect.x + 5, self.rect.y + 5)
-            end_pos = (self.rect.x + self.rect.width - 5, self.rect.y + self.rect.height - 5)
-            pygame.draw.line(screen, BLACK, start_pos, end_pos, 2)
-            pygame.draw.line(screen, BLACK, 
-                            (self.rect.x + self.rect.width - 5, self.rect.y + 5),
-                            (self.rect.x + 5, self.rect.y + self.rect.height - 5), 2)
-        else:
-            pygame.draw.rect(screen, BRICK_COLOR, self.rect)
-        pygame.draw.rect(screen, BLACK, self.rect, 2)
-
-class Wall:
-    def __init__(self):
-        self.bricks = []
-        brick_width = 40
-        brick_height = 20
-        wall_x = WIDTH // 2 - (brick_width * 3) // 2
-        
-        # Create brick pattern
-        for row in range(15):
-            for col in range(3):
-                # Stagger the bricks in alternating rows
-                offset = brick_width // 2 if row % 2 else 0
-                x = wall_x + col * brick_width + offset
-                y = 100 + row * brick_height
-                self.bricks.append(Brick(x, y, brick_width, brick_height))
-    
-    def draw(self):
-        for brick in self.bricks:
-            brick.draw()
-            
-    def hit(self, x, y):
-        hit_any = False
-        for brick in self.bricks[:]:
-            if brick.rect.collidepoint(x, y):
-                if brick.hit(random.randint(30, 60)):
-                    self.bricks.remove(brick)
-                hit_any = True
-                break
-        return hit_any, len(self.bricks) == 0
-
-class Player:
-    def __init__(self):
-        self.pos = Vector2(WIDTH // 2, HEIGHT - 100)
-        self.hammer_img = self._create_hammer_image()
-        self.stamina = 100
-        self.max_stamina = 100
-        self.hammer_angle = 0
-        self.swinging = False
-        self.swing_timer = 0
-        self.cooldown = False
-        self.cooldown_timer = 0
-        
-    def _create_hammer_image(self):
-        # Create a simple hammer shape
-        surf = pygame.Surface((60, 20), pygame.SRCALPHA)
-        pygame.draw.rect(surf, GRAY, (0, 5, 40, 10))  # Handle
-        pygame.draw.rect(surf, (50, 50, 50), (40, 0, 20, 20))  # Head
-        return surf
-        
-    def update(self, dt):
-        mouse_pos = pygame.mouse.get_pos()
-        # Point hammer toward mouse
-        direction = Vector2(mouse_pos) - self.pos
-        self.hammer_angle = direction.angle_to(Vector2(1, 0))
-        
-        # Handle swinging animation
-        if self.swinging:
-            self.swing_timer += dt
-            if self.swing_timer >= 300:  # 300ms swing animation
-                self.swinging = False
-                self.swing_timer = 0
-                self.cooldown = True
-                self.cooldown_timer = 0
-                
-        # Handle cooldown
-        if self.cooldown:
-            self.cooldown_timer += dt
-            self.stamina += dt * 0.05  # Recover stamina during cooldown
-            if self.cooldown_timer >= 1000:  # 1 second cooldown
-                self.cooldown = False
-                
-        # Cap stamina
-        self.stamina = min(self.max_stamina, self.stamina)
-        
-    def move(self, direction):
-        speed = 5
-        self.pos += direction * speed
-        # Keep player within bounds
-        self.pos.x = max(50, min(WIDTH - 50, self.pos.x))
-        self.pos.y = max(HEIGHT // 2, min(HEIGHT - 50, self.pos.y))
-        
-    def swing(self):
-        if not self.cooldown and not self.swinging and self.stamina >= 20:
-            self.swinging = True
-            self.stamina -= 20
-            return True
-        return False
-        
-    def draw(self):
-        # Draw player
-        pygame.draw.circle(screen, GREEN, (int(self.pos.x), int(self.pos.y)), 20)
-        
-        # Draw hammer
-        rotated_hammer = pygame.transform.rotate(self.hammer_img, self.hammer_angle)
-        hammer_pos = self.pos + Vector2(30, 0).rotate(-self.hammer_angle)
-        hammer_rect = rotated_hammer.get_rect(center=hammer_pos)
-        screen.blit(rotated_hammer, hammer_rect)
-        
-        # Draw stamina bar
-        bar_width = 100
-        bar_height = 10
-        stamina_rect = pygame.Rect(self.pos.x - bar_width // 2, self.pos.y + 30, bar_width, bar_height)
-        pygame.draw.rect(screen, RED, stamina_rect)
-        fill_width = int(bar_width * (self.stamina / self.max_stamina))
-        fill_rect = pygame.Rect(self.pos.x - bar_width // 2, self.pos.y + 30, fill_width, bar_height)
-        pygame.draw.rect(screen, GREEN, fill_rect)
-        pygame.draw.rect(screen, BLACK, stamina_rect, 1)
-
-# Create wall and player
-wall = Wall()
-player = Player()
-
-# Papers (for ending)
-class Paper:
-    def __init__(self):
-        self.pos = Vector2(random.randint(100, WIDTH - 100), random.randint(-200, -50))
-        self.vel = Vector2(random.uniform(-1, 1), random.uniform(1, 3))
-        self.rotation = random.randint(0, 360)
-        self.rot_speed = random.uniform(-2, 2)
-        self.size = Vector2(60, 80)
-        self.paper_img = self._create_paper_image()
-        
-    def _create_paper_image(self):
-        # Create a simple paper with text
-        surf = pygame.Surface((int(self.size.x), int(self.size.y)), pygame.SRCALPHA)
-        pygame.draw.rect(surf, WHITE, (0, 0, int(self.size.x), int(self.size.y)))
-        pygame.draw.rect(surf, BLACK, (0, 0, int(self.size.x), int(self.size.y)), 1)
-        
-        # Add "DIVORCE" text to the paper
-        text = font_small.render("DIVORCE", True, BLACK)
-        surf.blit(text, (int(self.size.x/2 - text.get_width()/2), 10))
-        
-        # Add some lines for text
-        for i in range(3):
-            pygame.draw.line(surf, BLACK, (10, 30 + i*15), (int(self.size.x) - 10, 30 + i*15), 1)
-        
-        return surf
-        
-    def update(self):
-        self.pos += self.vel
-        self.rotation += self.rot_speed
-        return self.pos.y > HEIGHT + 100
-        
-    def draw(self):
-        rotated = pygame.transform.rotate(self.paper_img, self.rotation)
-        pos = (int(self.pos.x), int(self.pos.y))
-        rect = rotated.get_rect(center=pos)
-        screen.blit(rotated, rect)
-
-papers = []
+DIALOGUE_SPEED = 1000  # milliseconds
 
 # Flash effect
 flash_active = False
