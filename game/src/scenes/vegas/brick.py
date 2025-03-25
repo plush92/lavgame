@@ -49,12 +49,12 @@ class Brick:
         if self.cracked:
             pygame.draw.rect(screen, (120, 30, 30), self.rect)
             # Draw crack lines
-            start_pos = (self.rect.x + 5, self.rect.y + 5)
-            end_pos = (self.rect.x + self.rect.width - 5, self.rect.y + self.rect.height - 5)
-            pygame.draw.line(screen, BLACK, start_pos, end_pos, 2)
-            pygame.draw.line(screen, BLACK, 
-                            (self.rect.x + self.rect.width - 5, self.rect.y + 5),
-                            (self.rect.x + 5, self.rect.y + self.rect.height - 5), 2)
-        else:
-            pygame.draw.rect(screen, BRICK_COLOR, self.rect)
-        pygame.draw.rect(screen, BLACK, self.rect, 2)
+            start_pos = (self.rect.x + 5, self.rect.y + 5) # Top left
+            end_pos = (self.rect.x + self.rect.width - 5, self.rect.y + self.rect.height - 5) # Bottom right
+            pygame.draw.line(screen, BLACK, start_pos, end_pos, 2) # Main crack
+            pygame.draw.line(screen, BLACK, # Secondary crack
+                            (self.rect.x + self.rect.width - 5, self.rect.y + 5), # Top right
+                            (self.rect.x + 5, self.rect.y + self.rect.height - 5), 2) # Bottom left
+        else: # Draw normal brick
+            pygame.draw.rect(screen, BRICK_COLOR, self.rect) # Draw brick
+        pygame.draw.rect(screen, BLACK, self.rect, 2) # Draw outline
