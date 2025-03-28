@@ -3,7 +3,6 @@ import sys
 import random
 import time
 from pygame.math import Vector2
-from src.scenes.vegas.brick import Brick
 from src.scenes.vegas.paper import Paper
 from src.scenes.vegas.player import Player
 from src.scenes.vegas.wall import Wall

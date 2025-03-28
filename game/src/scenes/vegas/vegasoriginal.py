@@ -83,12 +83,8 @@ for i in range(20): # Create 20 ceiling lights
     })
 
 # Casino background image
-casino_image = pygame.image.load("assets/casino.png")
+casino_image = pygame.image.load("assets/casino.jpeg")
 image_rect = casino_image.get_rect()
-
-# Player image
-player_image = pygame.image.load("assets/player.png")
-player_image = pygame.transform.scale(player_image, (50, 50))
 
 # Game loop
 def vegas(): # main game loop
@@ -99,7 +95,6 @@ def vegas(): # main game loop
     last_time = pygame.time.get_ticks() # Get the time at the start of the game
     wall_broken = False # Whether the wall has been broken
 
-    # Game loop
     running = True # Boolean to control the game loop
     while running: # Main game loop
         # Calculate delta time
@@ -125,12 +120,13 @@ def vegas(): # main game loop
                         
             elif event.type == pygame.MOUSEBUTTONDOWN and game_state == STATE_WALL_GAME: # If the user clicks the mouse
                 if player.swing(): # If the player successfully swings the hammer
-                    wall.hit(pygame.mouse.get_pos()) # Hit the wall at the mouse position
-                    wall_broken = wall.hit(pygame.mouse.get_pos()) # Check if the wall has been broken
+                    wall.hit(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]) # Hit the wall at the mouse position
+                    wall_broken = wall.hit(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]) # Check if the wall has been broken
                     if wall_broken: # If the wall has been broken
                         game_state = STATE_ENDING # Change the game state to the ending state
                         for _ in range(50): # Create 50 divorce papers
                             papers.append(Paper()) # Add a new paper to the list of papers
+                    hit_successful = wall.hit(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
         
         # Update game state
         if game_state == STATE_DIALOGUE: # If the game state is the dialogue state
@@ -169,14 +165,14 @@ def vegas(): # main game loop
             player.move(direction) # Move the player in the specified direction
             player.update(dt) # Update the player
 
-            if wall.is_destroyed and wall.update(dt): # If the wall is breaking and the wall update function returns true
+            if wall.breaking and wall.update(dt): # If the wall is breaking and the wall update function returns true
                 wall_broken = True # Set the wall broken flag to true
                 game_state = STATE_ENDING # Change the game state to the ending state
                 # Create divorce papers for the ending
                 for _ in range(50): # Create 50 divorce papers
                     papers.append(Paper()) # Add a new paper to the list of papers
             # If wall is breaking but animation not complete yet
-            elif wall.is_destroyed: # If the wall is breaking
+            elif wall.breaking: # If the wall is breaking
                 wall.update(dt) # Update the wall
             
         elif game_state == STATE_ENDING: # If the game state is the ending state
@@ -192,39 +188,39 @@ def vegas(): # main game loop
                 light['blink_timer'] = 0 # Reset the blink timer
                 light['on'] = not light['on'] # Toggle the light on/off
                 
-        # Drawing Casino (background, lights, slot machines, etc)
+        # Drawing
         # Draw casino background
-        # screen.fill(BLACK) # Fill the screen with a black background
-        screen.blit(casino_image, (0, 0)) # Fill the screen with a black background
+        screen.fill(BLACK) # Fill the screen with a black background
+        # screen.blit(casino_image, (0, 0)) # Fill the screen with a black background
         
-        # # Draw carpet pattern
-        # for y in range(0, HEIGHT, 40): # For each row of the carpet
-        #     for x in range(0, WIDTH, 40): # For each column of the carpet
-        #         if (x + y) % 80 == 0: # If the sum of the x and y coordinates is divisible by 80
-        #             pygame.draw.rect(screen, (100, 0, 100), (x, y, 40, 40)) # Draw a purple square
+        # Draw carpet pattern
+        for y in range(0, HEIGHT, 40): # For each row of the carpet
+            for x in range(0, WIDTH, 40): # For each column of the carpet
+                if (x + y) % 80 == 0: # If the sum of the x and y coordinates is divisible by 80
+                    pygame.draw.rect(screen, (100, 0, 100), (x, y, 40, 40)) # Draw a purple square
         
-        # # Draw ceiling lights
-        # for light in lights: # For each light in the list of lights
-        #     if light['on']: # If the light is on
-        #         pygame.draw.circle(screen, light['color'],  # Draw the light
-        #                         (int(light['pos'].x), int(light['pos'].y)),  # Position of the light
-        #                         light['radius']) # Radius of the light
-        #         # Light glow
-        #         pygame.draw.circle(screen, (255, 255, 100, 50),  # Draw the light glow
-        #                         (int(light['pos'].x), int(light['pos'].y)),  # Position of the light
-        #                         light['radius'] * 3) # Radius of the light glow
+        # Draw ceiling lights
+        for light in lights: # For each light in the list of lights
+            if light['on']: # If the light is on
+                pygame.draw.circle(screen, light['color'],  # Draw the light
+                                (int(light['pos'].x), int(light['pos'].y)),  # Position of the light
+                                light['radius']) # Radius of the light
+                # Light glow
+                pygame.draw.circle(screen, (255, 255, 100, 50),  # Draw the light glow
+                                (int(light['pos'].x), int(light['pos'].y)),  # Position of the light
+                                light['radius'] * 3) # Radius of the light glow
         
-        # # Draw slot machines
-        # for machine in slot_machines: # For each slot machine in the list of slot machines
-        #     pygame.draw.rect(screen, machine['color'],  # Draw the slot machine
-        #                     (machine['pos'].x, machine['pos'].y,  # Position of the slot machine
-        #                     machine['size'].x, machine['size'].y)) # Size of the slot machine
-        #     # Screen
-        #     pygame.draw.rect(screen, BLACK,  # Draw the screen of the slot machine
-        #                     (machine['pos'].x + 5, machine['pos'].y + 5,  # Position of the screen
-        #                     machine['size'].x - 10, machine['size'].y / 2 - 5)) # Size of the screen
+        # Draw slot machines
+        for machine in slot_machines: # For each slot machine in the list of slot machines
+            pygame.draw.rect(screen, machine['color'],  # Draw the slot machine
+                            (machine['pos'].x, machine['pos'].y,  # Position of the slot machine
+                            machine['size'].x, machine['size'].y)) # Size of the slot machine
+            # Screen
+            pygame.draw.rect(screen, BLACK,  # Draw the screen of the slot machine
+                            (machine['pos'].x + 5, machine['pos'].y + 5,  # Position of the screen
+                            machine['size'].x - 10, machine['size'].y / 2 - 5)) # Size of the screen
         
-        # Draw state-specific elements (draw depending on the state of the game)
+        # Draw state-specific elements
         if game_state == STATE_DIALOGUE: # If the game state is the dialogue state
             # Draw characters
             tim.draw() # Draw Tim

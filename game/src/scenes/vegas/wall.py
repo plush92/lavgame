@@ -1,9 +1,6 @@
 import pygame
-import sys
 import random
-import time
 from pygame.math import Vector2
-from src.scenes.vegas.brick import Brick
 
 # Initialize pygame
 pygame.init()
@@ -34,114 +31,88 @@ STATE_WALL_GAME = 1
 STATE_ENDING = 2
 game_state = STATE_DIALOGUE
 
-class Wall:
-    def __init__(self):
-        self.bricks = [] # List of bricks in the wall
-        brick_width = 60 # Width of each brick
-        brick_height = 30 # Height of each brick
-        wall_x = WIDTH // 2 - (brick_width * 3) // 2 # X position of the wall (centered) 
+class Wall: # Wall class for the wall game scene
+    def __init__(self, screen_width, screen_height): # Initialize the wall with the screen width and height
+        # Wall state tracking variables
+        self.hit_count = 0 # Number of hits on the wall
+        self.max_hits = 3 # Maximum hits before wall is destroyed
+        self.is_destroyed = False # Flag for wall destruction
         
-        # Create brick pattern - 3 columns x 5 rows
-        for row in range(5): # Loop through 5 rows
-            for col in range(3): # Loop through 3 columns
-                x = wall_x + col * brick_width # X position of the brick (centered)
-                y = 150 + row * brick_height # Y position of the brick (150 is the top margin)
-                # Assign a region: 0=left, 1=middle, 2=right based on column index
-                region = col # Region based on column index
-                self.bricks.append({ # Add brick to the list of bricks
-                    "rect": pygame.Rect(x, y, brick_width, brick_height), # Create a rectangle for the brick (x, y, width, height)
-                    "region": region, # Assign a region to the brick (0, 1, or 2)
-                    "cracked": False, # Set the brick as not cracked initially
-                    "broken": False # Set the brick as not broken initially
-                })
-                
-        # Track hits per region
-        self.hits_per_region = [0, 0, 0]  # [left, middle, right] regions
-        self.required_hits_per_region = [1, 1, 1]  # 2 hits per region required
+        # Load wall damage images
+        try: # Try to load the wall images
+            self.wall_stages = [ # List of wall damage images
+                pygame.image.load('assets/wall_stage0.jpeg'),  # Pristine wall #game/assets/wall_stage0.jpeg
+                pygame.image.load('assets/wall_stage1.png'),  # First hit damage #game/assets/wall_stage1.png
+                pygame.image.load('assets/wall_stage0.jpeg'),  # Second hit damage
+                pygame.image.load('assets/wall_stage1.png')   # Final destruction
+            ]
+        except pygame.error as e: # Handle image loading errors 
+            print(f"Error loading wall images: {e}") # Print the error message
+            self.wall_stages = None # Set wall stages to None
         
-        # Wall breaking animation
-        self.breaking = False # Set the wall as not breaking initially, will be set to True when breaking
-        self.break_timer = 0 # Timer for the breaking animation, starts at 0, increases over
-        self.break_duration = 1000  # Duration of the breaking animation in milliseconds, 1000ms = 1s
-        self.shake_amount = 0 # Amount of shake effect during breaking, starts at 0 and increases
+        # Wall positioning
+        self.screen_width = screen_width # Screen width for positioning
+        self.screen_height = screen_height # Screen height for positioning
         
-    def draw(self):
-        # Apply shake effect during breaking
-        shake_offset = Vector2(0, 0) # Initialize shake offset as (0, 0)
-        if self.breaking: # If the wall is breaking
-            shake_offset = Vector2( # Randomly offset the shake effect
-                random.uniform(-self.shake_amount, self.shake_amount), # Random offset in x direction
-                random.uniform(-self.shake_amount, self.shake_amount) # Random offset in y direction
-            )
-            
-        for brick in self.bricks: # Loop through each brick
-            if not brick["broken"]: # If the brick is not broken
-                # Position with shake
-                x = brick["rect"].x + shake_offset.x # Apply shake offset to x position
-                y = brick["rect"].y + shake_offset.y # Apply shake offset to y position
-                rect = pygame.Rect(x, y, brick["rect"].width, brick["rect"].height) # Create a rectangle with shake offset
-                
-                # Draw brick
-                if brick["cracked"]: # If the brick is cracked
-                    pygame.draw.rect(screen, (120, 30, 30), rect) # Draw a cracked brick
-                    # Draw crack lines on the brick (top left to bottom right, top right to bottom left)
-                    pygame.draw.line(screen, BLACK,  # Main crack
-                                    (rect.x + 5, rect.y + 5), # Top left corner of the crack line
-                                    (rect.x + rect.width - 5, rect.y + rect.height - 5), 2) # Bottom right corner of the crack line 
-                    pygame.draw.line(screen, BLACK,  # Secondary crack 
-                                    (rect.x + rect.width - 5, rect.y + 5), # Top right corner of the crack line 
-                                    (rect.x + 5, rect.y + rect.height - 5), 2) # Bottom left corner of the crack line 
-                else: # If the brick is not cracked 
-                    pygame.draw.rect(screen, BRICK_COLOR, rect) # Draw a normal brick 
-                pygame.draw.rect(screen, BLACK, rect, 2) # Draw an outline around the brick 
-                
-    def hit(self, x, y): # Function to hit a brick at a given position (x, y) on the screen 
-        if self.breaking: # If the wall is breaking, return False (no hits allowed during breaking) 
-            return False 
-            
-        for brick in self.bricks: # Loop through each brick 
-            if not brick["broken"] and not brick["cracked"] and brick["rect"].collidepoint(x, y): # If the brick is not broken, not cracked, and the hit position is on the brick 
-                region = brick["region"] # Get the region of the brick
-                if self.hits_per_region[region] < self.required_hits_per_region[region]: # If the region has not reached the required hits 
-                    # Crack the brick and update hits per region
-                    brick["cracked"] = True # Crack the brick 
-                    self.hits_per_region[region] += 1 # Increment hits for the region 
-                    
-                    # Check if all regions have required hits to break the wall
-                    if all(self.hits_per_region[i] >= self.required_hits_per_region[i] for i in range(3)): # If all regions have required hits
-                        # Start wall breaking animation
-                        self.breaking = True # Set the wall as breaking 
-                        self.break_timer = 0 # Reset the break timer
-                        self.shake_amount = 5 # Set the initial shake amount
-                        return True # Return True to indicate successful hit
-                    return True # Return True to indicate successful hit
-        return False # Return False if no brick was hit
+        # Calculate wall position (centered)
+        if self.wall_stages: # If wall images are loaded
+            wall_image = self.wall_stages[0] # Get the first wall image
+            self.x = (screen_width - wall_image.get_width()) // 2 # Calculate the x position to center the wall
+            self.y = (screen_height - wall_image.get_height()) // 2 # Calculate the y position to center the wall
+        else: # If wall images are not loaded
+            self.x = screen_width // 2 - 100 # Set x position to center of the screen
+            self.y = screen_height // 2 - 100 # Set y position to center of the screen
         
-    def update(self, dt): # Update the wall state with a time step (dt) 
-        if self.breaking: # If the wall is breaking 
-            self.break_timer += dt # Increment the break timer with the time step
-            # Increase shake as time passes
-            progress = self.break_timer / self.break_duration # Calculate the progress of the breaking animation
+        # Shake effect for impact
+        self.shake_offset = (0, 0) # Initial shake offset (x, y), no offset
+        self.shake_duration = 0 # Shake duration
+        self.shake_intensity = 5 # Shake intensity
+    
+    def draw(self, screen): # Draw the wall on the screen
+        # Handle no images case
+        if not self.wall_stages: # If wall images are not loaded
+            return # Exit the function
+        
+        # Determine current wall stage
+        current_stage = min(self.hit_count, self.max_hits) # Get the current wall damage stage
+        
+        # Apply shake if active
+        offset_x, offset_y = 0, 0 # Initial offset values for shake effect (x, y)
+        if self.shake_duration > 0:  # If the shake duration is active
+            offset_x = random.randint(-self.shake_intensity, self.shake_intensity) # Random offset within intensity range for x position 
+            offset_y = random.randint(-self.shake_intensity, self.shake_intensity) # Random offset within intensity range for y position
+        
+        # Draw wall with current damage stage
+        screen.blit(self.wall_stages[current_stage],  # Blit the current wall image to the screen with the shake offset
+                    (self.x + offset_x, self.y + offset_y)) # Position the wall image with the shake offset (x, y) 
+    
+    def hit(self, mouse_pos): # Handle wall hit detection with mouse position 
+        # Check if hit is within wall image bounds
+        if not self.wall_stages or self.is_destroyed: # If wall images are not loaded or wall is destroyed
+            return False # Exit the function
+        
+        current_wall = self.wall_stages[min(self.hit_count, self.max_hits)] # Get the current wall image based on damage stage 
+        wall_rect = current_wall.get_rect(topleft=(self.x, self.y)) # Get the rectangle of the wall image at the top left corner
+        
+        if wall_rect.collidepoint(mouse_pos):   # If the mouse position is within the wall image bounds
+            # Increment hit count on successful hit
+            self.hit_count += 1 # Increment the hit count
             
-            if progress < 0.8: # During the first 80% of the animation
-                # During the first 80%, increase shake
-                self.shake_amount = 5 + 15 * (progress / 0.8)   # Gradually increase shake amount 
-                
-                # Gradually break bricks
-                break_threshold = progress * 0.8 # Gradually increase the break threshold 
-                for brick in self.bricks: # Loop through each brick 
-                    if not brick["broken"]: # If the brick is not broken
-                        # Randomly break bricks as animation progresses
-                        if random.random() < (break_threshold * 0.1): # Randomly break bricks based on the break threshold 
-                            brick["broken"] = True # Break the brick 
-            else:
-                # Final 20% - all bricks break quickly
-                for brick in self.bricks: # Loop through each brick 
-                    if not brick["broken"] and random.random() < 0.4: # If the brick is not broken and a random chance is met
-                        brick["broken"] = True # Break the brick
+            # Trigger shake effect
+            self.shake_duration = 10 # Set the shake duration to 10 milliseconds (0.01 seconds)
             
-            # Check if animation is complete
-            if self.break_timer >= self.break_duration: # If the break timer exceeds the break duration
-                return True  # Wall breaking complete
-                
-        return False # Wall breaking not complete
+            # Check if wall is destroyed
+            if self.hit_count >= self.max_hits: # If the hit count reaches the maximum hits 
+                self.is_destroyed = True # Set the wall as destroyed
+            
+            return True # Return True if the hit is successful
+        
+        return False # Return False if the hit is not successful
+    
+    def update(self, dt): # Update the wall state based on time 
+        # Manage shake duration
+        if self.shake_duration > 0: # If the shake duration is active 
+            self.shake_duration -= dt # Decrement the shake duration by the time passed (delta time) 
+        
+        # Return True if wall is completely destroyed
+        return self.is_destroyed # Return True if the wall is destroyed, False otherwise 
