@@ -2,9 +2,9 @@ import pygame
 import sys
 import random
 import time
+import math
 from pygame.math import Vector2
 from src.scenes.vegas.paper import Paper
-from src.scenes.vegas.player import Player
 from src.scenes.vegas.wall import Wall
 
 # Initialize pygame
@@ -14,6 +14,7 @@ pygame.init()
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Tim and Lav in Vegas")
+clock = pygame.time.Clock()
 
 # Colors
 BLACK = (0, 0, 0)
@@ -36,17 +37,130 @@ STATE_WALL_GAME = 1
 STATE_ENDING = 2
 game_state = STATE_DIALOGUE
 
-class Character: # Character class for the player and enemies in the wall game scene
-    def __init__(self, name, x, y, color): # Initialize the character with a name, position, and color
-        self.name = name # Name of the character
-        self.pos = Vector2(x, y) # Position of the character, (x, y) coordinates on the screen
-        self.color = color # Color of the character (RGB tuple) 
-        self.size = 40 
+class Character(pygame.sprite.Sprite):
+    def __init__(self, name, x, y, color):
+        super().__init__()
+        self.name = name
+        self.image = pygame.Surface((50, 50))  # Create a surface for the character
+        self.image.fill(color)
+        self.rect = self.image.get_rect(center=(x, y))
         
-    def draw(self): # Draw the character on the screen 
-        pygame.draw.circle(screen, self.color, (int(self.pos.x), int(self.pos.y)), self.size) # Draw a circle for the character, (surface, color, (x, y), radius)
-        # int(self.pos.x) and int(self.pos.y) are the center of the circle, self.size is the radius
-        # The circle is filled with the character's color and at its position with the specified size
-        name_text = font_small.render(self.name, True, WHITE) # Render the character's name with the font_small font and white color 
-        screen.blit(name_text, (int(self.pos.x - name_text.get_width() / 2), # Blit the name text to the screen at the center horizontally and 10 pixels above the character
-                               int(self.pos.y + self.size + 5))) # pos.y + size is the bottom of the circle, +5 is the margin between the circle and text
+        # Animation variables
+        self.swinging = False
+        self.swing_timer = 0
+        self.swing_duration = 500  # ms
+        self.hammer_image = pygame.Surface((30, 10))
+        self.hammer_image.fill((150, 75, 0))  # Brown hammer
+        self.hammer_rect = self.hammer_image.get_rect()
+        
+        # Movement variables
+        self.speed = 200  # Speed in pixels per second
+
+    def swing(self):
+        """Start swinging the hammer if not already swinging"""
+        if not self.swinging:
+            self.swinging = True
+            self.swing_timer = pygame.time.get_ticks()
+            return True
+        return False
+
+    def check_wall_hit(self, wall):
+        """Check if the hammer hits the wall"""
+        if self.swinging and wall.rect.colliderect(self.hammer_rect):
+            # Only count hits at the peak of the swing (around 250ms in)
+            swing_progress = pygame.time.get_ticks() - self.swing_timer
+            if 200 <= swing_progress <= 300:
+                return True
+        return False
+
+    def move(self, dt):
+        keys = pygame.key.get_pressed()
+        dx, dy = 0, 0
+
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            dx -= self.speed * dt
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            dx += self.speed * dt
+        if keys[pygame.K_UP] or keys[pygame.K_w]:
+            dy -= self.speed * dt
+        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            dy += self.speed * dt
+
+        # Update position
+        self.rect.x += dx
+        self.rect.y += dy
+        
+        # Keep within screen bounds
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
+
+    def update(self, dt):
+        # Update swing animation
+        if self.swinging:
+            elapsed = pygame.time.get_ticks() - self.swing_timer
+            if elapsed > self.swing_duration:
+                self.swinging = False
+            
+            # Update hammer position based on swing animation
+            self._update_hammer_position(elapsed)
+            
+        self.move(dt)
+    
+    def _update_hammer_position(self, elapsed):
+        """Update the hammer position based on the swing animation progress"""
+        # Calculate swing progress (0 to 1)
+        progress = min(1.0, elapsed / self.swing_duration)
+        
+        # Use sine function for smooth back-and-forth swing motion
+        # Maps 0-1 to 0-π so we get a half sine wave
+        angle = -90 + (progress * 180)  # -90 to 90 degrees
+        
+        # Convert to radians
+        angle_rad = angle * (math.pi / 180)
+        
+        # Calculate hammer position
+        hammer_length = 50  # Length of the hammer from character center
+        
+        # Calculate offset from character center
+        offset_x = hammer_length * math.cos(angle_rad)
+        offset_y = hammer_length * math.sin(angle_rad)
+        
+        # Position hammer at end of calculated position
+        self.hammer_rect.center = (
+            self.rect.centerx + offset_x,
+            self.rect.centery + offset_y
+        )
+
+    def draw(self, surface, dt, offset_x=0, offset_y=0):
+        # Draw character with shake effect
+        adjusted_rect = self.rect.move(offset_x, offset_y)
+        surface.blit(self.image, adjusted_rect)
+
+        # Draw name (adjusted for shake)
+        font = pygame.font.SysFont('Arial', 16)
+        name_text = font.render(self.name, True, BLACK)
+        name_rect = name_text.get_rect(centerx=adjusted_rect.centerx, bottom=adjusted_rect.top - 5)
+        surface.blit(name_text, name_rect)
+
+        # Draw hammer if swinging (adjusted for shake)
+        if self.swinging:
+            elapsed = pygame.time.get_ticks() - self.swing_timer
+            progress = min(1.0, elapsed / self.swing_duration)
+            angle = -90 + (progress * 180)  # -90 to 90 degrees
+
+            # Rotate hammer image
+            rotated_hammer = pygame.transform.rotate(self.hammer_image, -angle)
+            rotated_rect = rotated_hammer.get_rect(center=self.hammer_rect.center)
+
+            # Apply offset to hammer
+            rotated_rect.x += offset_x
+            rotated_rect.y += offset_y
+
+            # Draw rotated hammer
+            surface.blit(rotated_hammer, rotated_rect)
