@@ -27,13 +27,14 @@ import pygame
 class Wall:
     def __init__(self, screen_width, screen_height):
         self.hit_count = 0  
-        self.max_hits = 3  
+        self.max_hits = 3  # Increase this to allow more hits
         self.is_destroyed = False  
 
+        # Make sure you have all these images in your assets folder
         self.images = [
             pygame.image.load("assets/wall_normal.png"),
             pygame.image.load("assets/wall_cracked.png"),
-            # pygame.image.load("assets/wall_heavily_cracked.png")
+            pygame.image.load("assets/wall_heavily_cracked.png")  # Add this 3rd image
         ]
         
         self.current_image = self.images[0]  
@@ -41,10 +42,12 @@ class Wall:
         self.width, self.height = self.current_image.get_size()
         self.x = (screen_width - self.width) // 2
         self.y = (screen_height - self.height) // 2
-
+        
+        # Add a rect attribute for collision detection
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         
-        self.fade_alpha = 255  
+        self.fade_alpha = 255
+        self.fade_speed = 2  # Slow down fade for better effect  
 
     def hit(self):
         """Handles wall hit logic and destruction."""
@@ -52,19 +55,25 @@ class Wall:
             return False  # No more hits after destruction
         
         self.hit_count += 1
+        print(f"Wall hit! Count: {self.hit_count}")  # Debug print
+        
         if self.hit_count >= self.max_hits:
+            print("Wall destroyed!")  # Debug print
             self.is_destroyed = True
-            self.fade_alpha = 255
-            return True  # Return True only when wall is completely destroyed
+            return True
         else:
-            # Use min to avoid index errors if hit_count exceeds image count
-            self.current_image = self.images[min(self.hit_count, len(self.images) - 1)]
-            return False  # Not completely destroyed yet
+            # Make sure we don't go out of bounds with image index
+            image_index = min(self.hit_count, len(self.images) - 1)
+            print(f"Changing to image {image_index}")  # Debug print
+            self.current_image = self.images[image_index]
+            return False
 
     def update(self, dt):
         """Handle fade-out effect when destroyed."""
         if self.is_destroyed and self.fade_alpha > 0:
-            self.fade_alpha -= 5  
+            self.fade_alpha -= self.fade_speed
+            if self.fade_alpha < 0:
+                self.fade_alpha = 0
             
     def draw(self, screen, offset_x=0, offset_y=0):
         """Draw wall (fading out if destroyed) with applied offsets."""
@@ -72,10 +81,9 @@ class Wall:
         draw_y = self.y + offset_y
 
         if self.is_destroyed:
-            faded_image = self.current_image.copy()
-            faded_image.fill((255, 255, 255, self.fade_alpha), special_flags=pygame.BLEND_RGBA_MULT)
-            screen.blit(faded_image, (draw_x, draw_y))
+            # Create a copy with adjusted alpha
+            temp_image = self.current_image.copy()
+            temp_image.set_alpha(self.fade_alpha)
+            screen.blit(temp_image, (draw_x, draw_y))
         else:
             screen.blit(self.current_image, (draw_x, draw_y))
-
-

@@ -128,11 +128,13 @@ def handle_wall_game_state(dt, game_vars):
     
     # Check for wall hit
     if tim.check_wall_hit(wall):
+        print("Hit detected!")  # Debug print
         screen_shaker.shake(10, 0.5)  # Shake for 0.5 seconds with intensity 10
         wall.hit()  # Hit the wall
         
     # Check for wall destruction ONLY after updating and drawing
     if wall.is_destroyed and wall.fade_alpha <= 0:
+        print("Transitioning to ending state")  # Debug print
         game_vars["game_state"] = STATE_ENDING
         game_vars["papers"] = create_papers()
     

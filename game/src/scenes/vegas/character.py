@@ -56,20 +56,26 @@ class Character(pygame.sprite.Sprite):
         # Movement variables
         self.speed = 200  # Speed in pixels per second
 
+        self.has_hit_wall_this_swing = False
+
     def swing(self):
         """Start swinging the hammer if not already swinging"""
         if not self.swinging:
             self.swinging = True
             self.swing_timer = pygame.time.get_ticks()
+            self.has_hit_wall_this_swing = False
             return True
         return False
 
     def check_wall_hit(self, wall):
         """Check if the hammer hits the wall"""
+        if wall.is_destroyed or self.has_hit_wall_this_swing:
+            return False
         if self.swinging and wall.rect.colliderect(self.hammer_rect):
             # Only count hits at the peak of the swing (around 250ms in)
             swing_progress = pygame.time.get_ticks() - self.swing_timer
             if 200 <= swing_progress <= 300:
+                self.has_hit_wall_this_swing = True
                 return True
         return False
 
@@ -111,6 +117,8 @@ class Character(pygame.sprite.Sprite):
             self._update_hammer_position(elapsed)
             
         self.move(dt)
+        if not self.swinging:
+            self.has_hit_wall_this_swing = False
     
     def _update_hammer_position(self, elapsed):
         """Update the hammer position based on the swing animation progress"""
