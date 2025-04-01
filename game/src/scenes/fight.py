@@ -284,7 +284,7 @@ def main():
     
     # Create dialog system
     dialog_system = DialogSystem(WIDTH, HEIGHT)
-
+    
     # Create characters 
     player = Character(200, HEIGHT//2, BLUE, is_player=True, image_path=("assets/character.png"), name="Tim")
     dad = Character(WIDTH - 250, HEIGHT//2, RED, is_player=False, name="Dad")

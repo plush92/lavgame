@@ -14,11 +14,11 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 # Define a more complex labyrinth but with more openings
 def create_labyrinth_walls():
     walls = [
-        # Outer boundaries
-        pygame.Rect(0, 0, SCREEN_WIDTH, 20),
-        pygame.Rect(0, 0, 20, SCREEN_HEIGHT),
-        pygame.Rect(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 20),
-        pygame.Rect(SCREEN_WIDTH-20, 0, 20, SCREEN_HEIGHT),
+        # Removed outer boundaries
+        # pygame.Rect(0, 0, SCREEN_WIDTH, 20),
+        # pygame.Rect(0, 0, 20, SCREEN_HEIGHT),
+        # pygame.Rect(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 20),
+        # pygame.Rect(SCREEN_WIDTH-20, 0, 20, SCREEN_HEIGHT),
     ]
 
     # Inner border

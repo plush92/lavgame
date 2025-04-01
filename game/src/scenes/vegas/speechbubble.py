@@ -22,7 +22,7 @@ class SpeechBubble:
         """Prepare the speech bubble by calculating text dimensions and wrapping if needed"""
         # Determine if the text needs to be wrapped
         speaker_prefix = f"{self.character.name.capitalize()}: "
-        full_text = speaker_prefix + self.text
+        full_text = self.text
         
         # Check if text exceeds max width
         test_surface = self.font.render(full_text, True, self.text_color)

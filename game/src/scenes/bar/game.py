@@ -57,7 +57,7 @@ class Game:
         self.exit = pygame.Rect(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, 30, 30)
         
         # Place bouncer at a different location
-        self.bouncer = Bouncer(SCREEN_WIDTH - 100, 100)
+        self.bouncer = Bouncer(SCREEN_WIDTH - 200, 200, image_path=("assets/bouncer.png"))
         
         # Game state and dialogue setup
         self.game_state = 'bar'
@@ -234,7 +234,7 @@ class Game:
             pygame.draw.rect(screen, WHITE, self.player.rect)
 
             # Draw bouncer
-            pygame.draw.rect(screen, RED, self.bouncer.rect)
+            self.bouncer.draw(screen)
 
             # Draw countdown or bouncer start message
             if not self.bouncer.can_move:
