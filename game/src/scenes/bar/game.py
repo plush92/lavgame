@@ -63,7 +63,7 @@ class Game:
         self.game_state = 'bar'
         self.drink_count = 0
         self.dialogue = [
-            f"{self.player.name}: what a great night… I wonder if there's any hometown honkey tonk skanks I can leave this bar with…",
+            f"{self.player.name}: What a great night… I wonder if there's any hometown honkey tonk skanks I can leave this bar with…",
             f"{self.player.name}: Wow, I've had a lot to drink",
             f"{self.player.name}: Oh no… Where is my fanny pack?"
         ]
