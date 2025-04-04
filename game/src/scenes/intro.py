@@ -63,7 +63,7 @@ def game_intro():
     result = scene_wait_for_continue()
     
     if result == "continue":
-        from src.scenes.fight import start_fight  # Import FightScene class  # Import the fight scene module
+        from game.src.scenes.fight.fight import start_fight  # Import FightScene class  # Import the fight scene module
         start_fight()  # Start the fight scene
 
 def start_intro():

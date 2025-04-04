@@ -28,7 +28,7 @@ class DrivingScene:
         self.girl = pygame.image.load(os.path.join(assets_dir, "girl.png"))  # Load the girl image
         self.girl = pygame.transform.scale(self.girl, (20, 30))  # Scale the girl image
         self.gargoyle = pygame.image.load(os.path.join(assets_dir, "gargoyle.png"))  # Load the gargoyle image
-        self.gargoyle = pygame.transform.scale(self.gargoyle, (30, 30))  # Scale the gargoyle image
+        self.gargoyle = pygame.transform.scale(self.gargoyle, (30, 30))  # Scale the gargoyle image, 
         
         # Load obstacle images
         obstacle_filenames = [
@@ -43,6 +43,13 @@ class DrivingScene:
             pygame.transform.scale(pygame.image.load(os.path.join(assets_dir, filename)), (50, 50))  # Load and scale each obstacle image
             for filename in obstacle_filenames
         ]
+        self.highway_top = self.load_highway_top_image()  # Load the highway top image
+    
+    def load_highway_top_image(self):
+        """Load and return the highway top image."""
+        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))  # Path to the assets directory
+        highway_top = pygame.image.load(os.path.join(assets_dir, "highwaytop.png"))  # Load the highway top image
+        return pygame.transform.scale(highway_top, (WIDTH, 100))  # Scale the image to fit the screen width
     
     def update(self):
         self.car_rect.centerx = self.lane_positions[self.current_lane]  # Update the car's position based on the current lane
@@ -64,14 +71,17 @@ class DrivingScene:
     def draw(self, screen):
         screen.fill((30, 30, 30))  # Fill the screen with a dark gray background
         pygame.draw.rect(screen, (50, 50, 50), (MARGIN, 0, ROAD_WIDTH, HEIGHT))  # Draw the road
+
+        highway_top = self.load_highway_top_image()  # Load the highway background
+        screen.blit(highway_top, (0, 0))  # Draw the highway background
         
         for i in range(1, 4):  # Draw lane dividers
             pygame.draw.line(screen, (255, 255, 255), (MARGIN + LANE_WIDTH * i, 0), (MARGIN + LANE_WIDTH * i, HEIGHT), 5)
         
         screen.blit(self.car, self.car_rect)  # Draw the car
         screen.blit(self.player, (self.car_rect.left + 10, self.car_rect.top + 10))  # Draw the player on the car
-        screen.blit(self.girl, (self.car_rect.left + 50, self.car_rect.top + 10))  # Draw the girl on the car
-        screen.blit(self.gargoyle, (self.car_rect.right - 40, self.car_rect.top - 10))  # Draw the gargoyle on the car
+        screen.blit(self.girl, (self.car_rect.left + 10, self.car_rect.top + 10))  # Draw the girl on the car
+        screen.blit(self.gargoyle, (self.car_rect.left + 5, self.car_rect.top + 5))  # Draw the gargoyle on the car
         
         for obstacle_rect, obstacle_image in self.obstacles:  # Draw each obstacle
             screen.blit(obstacle_image, obstacle_rect.topleft)  # Draw the obstacle image at its position

@@ -1,7 +1,7 @@
 import pygame  # Import pygame module
 import sys  # Import sys module
 from src.scenes.intro import start_intro  # Import IntroScene class
-from src.scenes.fight import start_fight  # Import FightScene class
+from src.scenes.fight.fight import start_fight  # Import FightScene class
 from src.scenes.bar.game import start_bar  # Import BarScene class
 from src.scenes.date.date import start_date  # Import DateScene class
 from src.scenes.vegas.vegas import start_vegas  # Import VegasScene class
