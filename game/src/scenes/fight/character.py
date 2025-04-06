@@ -2,6 +2,10 @@ import pygame
 import random
 import math
 import sys
+import os
+
+# Define the assets directory
+assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
 
 # Colors
 WHITE = (255, 255, 255)
@@ -43,18 +47,20 @@ class Character:
 
     def load_image(self, path):
         try:
-            self.image = pygame.image.load(path).convert()
+            # Construct the full path to the image
+            full_path = os.path.join(assets_dir, path)
+            self.image = pygame.image.load(full_path).convert_alpha()
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
             # Create flipped version for left direction
             self.image_flipped = pygame.transform.flip(self.image, True, False)
         except pygame.error as e:
-            print(f"Error loading image {path}: {e}")
+            print(f"Error loading image {full_path}: {e}")
             self.image = None
 
     def draw(self, surface):
         if self.image:
             # Use the appropriate image based on direction
-            img_to_draw = self.image_flipped if self.direction == -1 else self.image
+            img_to_draw = self.image if self.direction == -1 else self.image_flipped
             surface.blit(img_to_draw, (self.x, self.y))
         else:
             # Draw rectangle for player or if image failed to load
@@ -72,27 +78,45 @@ class Character:
             punch_size = 20
             if self.direction == 1:  # Facing right
                 pygame.draw.rect(surface, punch_color, 
-                                (self.x + self.width, self.y + self.height//3, punch_size, self.height//3))
+                                 (self.x + self.width, self.y + self.height//3, punch_size, self.height//3))
             else:  # Facing left
                 pygame.draw.rect(surface, punch_color, 
-                                (self.x - punch_size, self.y + self.height//3, punch_size, self.height//3))
+                                 (self.x - punch_size, self.y + self.height//3, punch_size, self.height//3))
 
-    def move(self, dx, dy):
-        self.x += dx * self.speed
-        self.y += dy * self.speed
-        
+    def move(self, dx, dy, props):
+        # Tentatively update position
+        new_x = self.x + dx * self.speed
+        new_y = self.y + dy * self.speed
+
+        print(f"Tentative position: ({new_x}, {new_y})")  # Debugging
+
+        # Check collisions with props
+        for prop in props:
+            if prop.type == "floor" and not prop.check_collision(new_x, new_y, self.width, self.height):
+                print(f"Collision with floor at ({new_x}, {new_y}), movement restricted")
+                return  # Cancel movement
+            if prop.type == "table" and prop.check_collision(new_x, new_y, self.width, self.height):
+                print(f"Collision with table at ({new_x}, {new_y}), movement restricted")
+                return  # Cancel movement
+
+        # If no collisions, update position
+        self.x = new_x
+        self.y = new_y
+        print(f"Player moved to ({self.x}, {self.y})")  # Debugging
+
         # Update direction based on movement
         if dx > 0:
-            self.direction = 1
+            self.direction = 1  # Facing right
         elif dx < 0:
-            self.direction = -1
+            self.direction = -1  # Facing left
 
-    def check_collision(self, other):
-        # Simple rectangle collision
-        return (self.x < other.x + other.width and
-                self.x + self.width > other.x and
-                self.y < other.y + other.height and
-                self.y + self.height > other.y)
+    def check_collision(self, x, y, width, height):
+        collision = (self.x < x + width and
+                    self.x + self.width > x and
+                    self.y < y + height and
+                    self.y + self.height > y)
+        print(f"Checking collision with {self.type}: {collision} (Player: x={x}, y={y}, width={width}, height={height}, Prop: x={self.x}, y={self.y}, width={self.width}, height={self.height})")  # Debugging
+        return collision
                 
     def can_punch(self, other):
         # Check if in range to punch

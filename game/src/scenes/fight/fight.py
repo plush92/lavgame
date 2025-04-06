@@ -57,31 +57,25 @@ def initialize_game():
 
 def create_game_objects():
     """Create all game objects including characters and props"""
-    # Create dialog system
-    dialog_system = DialogSystem(WIDTH, HEIGHT)
-    
-    # Create characters 
-    player = Character(200, HEIGHT//2, BLUE, is_player=True, image_path=("assets/character.png"), name="Tim")
-    dad = Character(WIDTH - 250, HEIGHT//2, RED, is_player=False, name="Dad")
-
-    # Create kitchen background
-    kitchen = Kitchen(WIDTH, HEIGHT, "assets/kitchen.png")
-    
-    # Create kitchen props
-    fridge = KitchenProp(WIDTH - 150, 100, 100, 200, LIGHT_GRAY, "fridge", render_image=False)
-    table = KitchenProp(WIDTH//2 - 125, HEIGHT//2, 250, 75, color=None, 
-                       image_path=("assets/kitchentable.png"), prop_type="table", render_image=False)
-    
-    # Create cabinets
-    cabinets = []
-    # Upper cabinets
-    # for i in range(4):
-    #     cabinets.append(KitchenProp(50 + i*125, 50, 100, 80, LIGHT_GRAY, "cabinet"))
-    # # Lower cabinets
-    # for i in range(4):
-    #     cabinets.append(KitchenProp(50 + i*125, HEIGHT - 150, 100, 100, LIGHT_GRAY, "cabinet"))
-    
+    # Call the create_game_objects method from KitchenProp
+    dialog_system, player, dad, kitchen, props = KitchenProp.create_game_objects()
+    fridge, table, *cabinets = props  # Unpack the props list
     return dialog_system, player, dad, kitchen, fridge, table, cabinets
+    # Create dialog system
+    # dialog_system = DialogSystem(WIDTH, HEIGHT)
+    
+    # # Create characters 
+    # player = Character(200, HEIGHT//2, BLUE, is_player=True, image_path=("mc_walk_f1.png"), name="Tim")
+    # dad = Character(WIDTH - 250, HEIGHT//2, RED, is_player=False, name="Dad")
+
+    # # Create kitchen background
+    # kitchen = Kitchen(WIDTH, HEIGHT, "assets/kitchen.png")
+    
+    # # Create kitchen props
+    # fridge = KitchenProp(WIDTH - 150, 100, 100, 200, LIGHT_GRAY, "fridge", render_image=False)
+    # table = KitchenProp(WIDTH//2 - 125, HEIGHT//2, 250, 75, None, "table", render_image=False)
+    
+    # return dialog_system, player, dad, kitchen, fridge, table, cabinets
 
 # GAMEPLAY FUNCTIONS
 # -------------------------------------------
@@ -195,55 +189,70 @@ def handle_game_over_events(event, player, dad, dialog_system, game_state):
     
     return game_state, running
 
-def update_kitchen_state(screen, player, dad, fridge, table, cabinets, small_font):
-    """Update and draw kitchen state"""
+def update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state):
+    """Update and draw kitchen state."""
     # Draw kitchen background
-    kitchen = Kitchen(WIDTH, HEIGHT, "assets/kitchen.png")
     kitchen.draw(screen)
+
+    # Draw debugging grid for the kitchen (optional)
+    kitchen.draw_debug(screen, grid_size=50, color=(0, 255, 0))  # Green grid for debugging
+
+    # Draw collision boxes for debugging
+    for prop in props:
+        prop.draw_debug(screen)
+    # Debug props list
+    print(f"Props: {[prop.type for prop in props]}")  # Debugging
     
-    # Draw cabinets and kitchen props
-    for cabinet in cabinets:
-        cabinet.draw(screen)
-    
+    # Draw player and dad
+    player.draw(screen)
+    dad.draw(screen)
+
     # Player movement with arrow keys
     keys = pygame.key.get_pressed()
     dx, dy = 0, 0
     if keys[pygame.K_LEFT]:
+        print("Left key pressed")  # Debugging
         dx = -1
     if keys[pygame.K_RIGHT]:
+        print("Right key pressed")  # Debugging
         dx = 1
     if keys[pygame.K_UP]:
+        print("Up key pressed")  # Debugging
         dy = -1
     if keys[pygame.K_DOWN]:
+        print("Down key pressed")  # Debugging
         dy = 1
     
-    player.move(dx, dy)
-    
-    # Keep player in play area
-    player.x = max(PLAY_AREA_LEFT, min(player.x, PLAY_AREA_RIGHT - player.width))
-    player.y = max(PLAY_AREA_TOP, min(player.y, PLAY_AREA_BOTTOM - player.height))
-    
-    # Collision detection with kitchen props
-    fridge_collision = abs(player.x - fridge.x) < player.width + 20 and abs(player.y - fridge.y) < player.height + 20
-    
-    # Draw dad in kitchen
-    dad.x = WIDTH - 300
-    dad.y = HEIGHT//2
-    dad.draw(screen)
-    
-    # Draw player
-    player.draw(screen)
-    
+    print(f"dx: {dx}, dy: {dy}, direction: {player.direction}")  # Debugging
+
+    # Move the player using the move method
+    player.move(dx, dy, props)
+
+    # # Restrict player to the floor area
+    # floor = next(prop for prop in props if prop.type == "floor")
+    # if not floor.check_collision(player.x, player.y, player.width, player.height):
+    #     # If the player is outside the floor area, revert the movement
+    #     player.x -= dx * player.speed
+    #     player.y -= dy * player.speed
+
+    # # Prevent the player from moving through the table
+    # table = next(prop for prop in props if prop.type == "table")
+    # if table.check_collision(player.x, player.y, player.width, player.height):
+    #     # If the player collides with the table, revert the movement
+    #     player.x -= dx * player.speed
+    #     player.y -= dy * player.speed
+
+    # Check collision with the fridge
+    fridge = next(prop for prop in props if prop.type == "fridge")
+    if fridge.check_collision(player.x, player.y, player.width, player.height):
+        print("Collision with fridge! Initiating tortellini minigame...")
+        game_state = FRIDGE_MINIGAME
+
     # Draw instruction
     instruction_text = small_font.render("Use ARROW KEYS to move, SPACE to interact", True, GRAY)
-    screen.blit(instruction_text, (WIDTH//2 - instruction_text.get_width()//2, HEIGHT - 30))
-    
-    # Show interaction hint if near fridge
-    if fridge_collision:
-        hint_text = small_font.render("Press SPACE to open fridge", True, BLACK)
-        screen.blit(hint_text, (player.x - 30, player.y - 30))
-    
-    return fridge_collision
+    screen.blit(instruction_text, (WIDTH // 2 - instruction_text.get_width() // 2, HEIGHT - 30))
+
+    return game_state
 
 def update_dialog_state(screen, player, dad, cabinets, table, fridge, dialog_system):
     """Update and draw dialog state"""
@@ -423,6 +432,7 @@ def main():
     fridge_collision_debounce = 0
     
     while running:
+        # print(f"Current game state: {game_state}")  # Debugging game state
         # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -430,8 +440,14 @@ def main():
             
             # Handle state-specific events
             if game_state == KITCHEN:
-                game_state = handle_kitchen_events(event, player, fridge, game_state, fridge_collision_debounce)
+                props = [fridge, table] + cabinets
+                
+                game_state = update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state)
             
+                # Debounce for fridge interaction
+                if fridge_collision_debounce > 0:
+                    fridge_collision_debounce -= 1
+
             elif game_state == DIALOG:
                 game_state = handle_dialog_events(event, dialog_system, game_state)
                 if game_state == FRIDGE_MINIGAME:
@@ -459,9 +475,13 @@ def main():
         
         # Update and draw based on game state
         if game_state == KITCHEN:
-            fridge_collision = update_kitchen_state(
-                screen, player, dad, fridge, table, cabinets, small_font)
-            
+            # Flatten cabinets into the props list
+            props = [fridge, table] + cabinets
+            # print(f"Props to render: {[prop.type for prop in props]}")  # Debugging
+            game_state = update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state)
+            # Update kitchen state
+            fridge_collision = update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state)
+
             # Debounce for fridge interaction
             if fridge_collision_debounce > 0:
                 fridge_collision_debounce -= 1
