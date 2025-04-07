@@ -1,5 +1,3 @@
-# IMPORTS
-# -------------------------------------------
 import pygame
 import random
 import math
@@ -9,6 +7,8 @@ from src.scenes.fight.dialogue import DialogSystem
 from src.scenes.fight.fridgeitem import FridgeItem
 from src.scenes.fight.kitchenprop import KitchenProp
 from src.scenes.fight.kitchen import Kitchen
+from src.scenes.fight.fridgeminigame import FridgeMinigame
+import os
 
 # CONSTANTS & GLOBAL VARIABLES
 # -------------------------------------------
@@ -34,6 +34,11 @@ GAME_OVER = 4
 
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
+
+# Define the assets directory
+assets_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets", "fridge_background.png"))
+# Game assets
+fridge_minigame = FridgeMinigame(WIDTH, HEIGHT, assets_path)
 
 # Movement boundaries
 PLAY_AREA_TOP = 50
@@ -61,52 +66,9 @@ def create_game_objects():
     dialog_system, player, dad, kitchen, props = KitchenProp.create_game_objects()
     fridge, table, *cabinets = props  # Unpack the props list
     return dialog_system, player, dad, kitchen, fridge, table, cabinets
-    # Create dialog system
-    # dialog_system = DialogSystem(WIDTH, HEIGHT)
-    
-    # # Create characters 
-    # player = Character(200, HEIGHT//2, BLUE, is_player=True, image_path=("mc_walk_f1.png"), name="Tim")
-    # dad = Character(WIDTH - 250, HEIGHT//2, RED, is_player=False, name="Dad")
-
-    # # Create kitchen background
-    # kitchen = Kitchen(WIDTH, HEIGHT, "assets/kitchen.png")
-    
-    # # Create kitchen props
-    # fridge = KitchenProp(WIDTH - 150, 100, 100, 200, LIGHT_GRAY, "fridge", render_image=False)
-    # table = KitchenProp(WIDTH//2 - 125, HEIGHT//2, 250, 75, None, "table", render_image=False)
-    
-    # return dialog_system, player, dad, kitchen, fridge, table, cabinets
 
 # GAMEPLAY FUNCTIONS
 # -------------------------------------------
-
-def setup_fridge_minigame():
-    """Set up the fridge minigame with items"""
-    fridge_items = []
-    tortellini_found = False
-    
-    # Create food items
-    num_items = 12
-    grid_cols = 3
-    grid_rows = 4
-    item_width = 40
-    item_height = 40
-    grid_spacing_x = (WIDTH - 200) // grid_cols
-    grid_spacing_y = (HEIGHT - 200) // grid_rows
-    
-    # Place one tortellini randomly
-    tortellini_pos = random.randint(0, num_items - 1)
-    
-    for i in range(num_items):
-        col = i % grid_cols
-        row = i // grid_cols
-        x = 100 + col * grid_spacing_x
-        y = 100 + row * grid_spacing_y
-        
-        item_type = "tortellini" if i == tortellini_pos else "other"
-        fridge_items.append(FridgeItem(x, y, item_type))
-    
-    return fridge_items, tortellini_found
 
 def handle_kitchen_events(event, player, fridge, game_state, fridge_collision_debounce):
     """Handle events in kitchen state"""
@@ -131,26 +93,16 @@ def handle_dialog_events(event, dialog_system, game_state):
         
     return game_state
 
-def handle_fridge_minigame_events(event, fridge_items, game_state, tortellini_found, dialog_system):
-    """Handle events in fridge minigame state"""
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        # Check if mouse is over any item
-        mouse_pos = pygame.mouse.get_pos()
-        for item in fridge_items:
-            if (mouse_pos[0] > item.x and mouse_pos[0] < item.x + item.width and
-                mouse_pos[1] > item.y and mouse_pos[1] < item.y + item.height):
-                if item.item_type == "tortellini":
-                    tortellini_found = True
-                    # Continue dialog after a brief pause
-                    pygame.time.set_timer(pygame.USEREVENT, 1500)  # 1.5 seconds
-                break
-    
-    # Return to dialog after finding tortellini
-    if event.type == pygame.USEREVENT:
-        pygame.time.set_timer(pygame.USEREVENT, 0)  # Cancel the timer
+def handle_fridge_minigame_events(event, fridge_minigame, game_state, tortellini_found, dialog_system):
+    """Handle events in fridge minigame state."""
+    # Delegate event handling to the FridgeMinigame class
+    if fridge_minigame.handle_event(event):
+        # If the tortellini is found, transition back to the dialog state
         game_state = DIALOG
-        dialog_system.dialog_index += 1  # Skip the fridge dialog
-    
+        dialog_system.dialog_index += 1  # Move to the next dialog
+        dialog_system.active = True
+        tortellini_found = True
+
     return game_state, tortellini_found
 
 def handle_fighting_events(event, player, dad, game_state):
@@ -172,6 +124,7 @@ def handle_fighting_events(event, player, dad, game_state):
 
 def handle_game_over_events(event, player, dad, dialog_system, game_state):
     """Handle events in game over state"""
+    running = True
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_r:
             # Reset game
@@ -200,8 +153,6 @@ def update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_s
     # Draw collision boxes for debugging
     for prop in props:
         prop.draw_debug(screen)
-    # Debug props list
-    print(f"Props: {[prop.type for prop in props]}")  # Debugging
     
     # Draw player and dad
     player.draw(screen)
@@ -211,36 +162,16 @@ def update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_s
     keys = pygame.key.get_pressed()
     dx, dy = 0, 0
     if keys[pygame.K_LEFT]:
-        print("Left key pressed")  # Debugging
         dx = -1
     if keys[pygame.K_RIGHT]:
-        print("Right key pressed")  # Debugging
         dx = 1
     if keys[pygame.K_UP]:
-        print("Up key pressed")  # Debugging
         dy = -1
     if keys[pygame.K_DOWN]:
-        print("Down key pressed")  # Debugging
         dy = 1
-    
-    print(f"dx: {dx}, dy: {dy}, direction: {player.direction}")  # Debugging
 
     # Move the player using the move method
     player.move(dx, dy, props)
-
-    # # Restrict player to the floor area
-    # floor = next(prop for prop in props if prop.type == "floor")
-    # if not floor.check_collision(player.x, player.y, player.width, player.height):
-    #     # If the player is outside the floor area, revert the movement
-    #     player.x -= dx * player.speed
-    #     player.y -= dy * player.speed
-
-    # # Prevent the player from moving through the table
-    # table = next(prop for prop in props if prop.type == "table")
-    # if table.check_collision(player.x, player.y, player.width, player.height):
-    #     # If the player collides with the table, revert the movement
-    #     player.x -= dx * player.speed
-    #     player.y -= dy * player.speed
 
     # Check collision with the fridge
     fridge = next(prop for prop in props if prop.type == "fridge")
@@ -273,33 +204,21 @@ def update_dialog_state(screen, player, dad, cabinets, table, fridge, dialog_sys
     # Draw and process dialog
     dialog_system.draw(screen)
 
-def update_fridge_minigame_state(screen, fridge_items, tortellini_found, small_font, font):
-    """Update and draw fridge minigame state"""
-    # Draw fridge background
-    pygame.draw.rect(screen, (230, 240, 250), (0, 0, WIDTH, HEIGHT))
-    
-    # Draw fridge shelves
-    for i in range(4):
-        pygame.draw.rect(screen, (200, 200, 200), (50, 150 + i*100, WIDTH - 100, 5))
-    
-    # Draw fridge items
-    for item in fridge_items:
-        item.draw(screen)
-    
-    # Draw cursor for selection
-    mouse_pos = pygame.mouse.get_pos()
-    pygame.draw.circle(screen, BLACK, mouse_pos, 5, 1)
-    
+def update_fridge_minigame_state(screen, fridge_minigame, tortellini_found, small_font, font):
+    """Update and draw fridge minigame state."""
+    # Draw the fridge minigame using the FridgeMinigame instance
+    fridge_minigame.draw(screen)
+
     # Draw instructions
     instruction_text1 = small_font.render("Move your mouse over an item and click to select", True, BLACK)
     instruction_text2 = small_font.render("Find the tortellini!", True, BLACK)
-    screen.blit(instruction_text1, (WIDTH//2 - instruction_text1.get_width()//2, 30))
-    screen.blit(instruction_text2, (WIDTH//2 - instruction_text2.get_width()//2, 60))
-    
-    # If tortellini is found
-    if tortellini_found:
+    screen.blit(instruction_text1, (WIDTH // 2 - instruction_text1.get_width() // 2, 30))
+    screen.blit(instruction_text2, (WIDTH // 2 - instruction_text2.get_width() // 2, 60))
+
+    # If tortellini is found, display a success message
+    if fridge_minigame.tortellini_found:
         found_text = font.render("You found the tortellini!", True, GREEN)
-        screen.blit(found_text, (WIDTH//2 - found_text.get_width()//2, HEIGHT//2 - 50))
+        screen.blit(found_text, (WIDTH // 2 - found_text.get_width() // 2, HEIGHT // 2 - 50))
 
 def update_fighting_state(screen, player, dad, cabinets, table, fridge, small_font):
     """Update and draw fighting state"""
@@ -423,16 +342,18 @@ def main():
     # Game state
     game_state = KITCHEN
     
-    # Fridge minigame items
-    fridge_items = []
+    # Fridge minigame instance
+    fridge_minigame = None
     tortellini_found = False
+
+    # Path to assets
+    # fridge_background_path = os.path.join(os.path.dirname(__file__), "assets", "fridge_background.png")
     
     # Main game loop
     running = True
     fridge_collision_debounce = 0
     
     while running:
-        # print(f"Current game state: {game_state}")  # Debugging game state
         # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -440,48 +361,33 @@ def main():
             
             # Handle state-specific events
             if game_state == KITCHEN:
-                props = [fridge, table] + cabinets
-                
-                game_state = update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state)
-            
-                # Debounce for fridge interaction
-                if fridge_collision_debounce > 0:
-                    fridge_collision_debounce -= 1
-
+                game_state = handle_kitchen_events(event, player, fridge, game_state, fridge_collision_debounce)
             elif game_state == DIALOG:
                 game_state = handle_dialog_events(event, dialog_system, game_state)
-                if game_state == FRIDGE_MINIGAME:
-                    fridge_items, tortellini_found = setup_fridge_minigame()
-                elif game_state == FIGHTING:
-                    # Reset positions for fight
-                    player.x = WIDTH // 3
-                    player.y = HEIGHT // 2
-                    dad.x = 2 * WIDTH // 3
-                    dad.y = HEIGHT // 2
-            
             elif game_state == FRIDGE_MINIGAME:
-                game_state, tortellini_found = handle_fridge_minigame_events(
-                    event, fridge_items, game_state, tortellini_found, dialog_system)
-            
+                # Make sure fridge_minigame is initialized when we enter this state
+                if fridge_minigame is None:
+                    fridge_minigame = FridgeMinigame(WIDTH, HEIGHT, assets_path)
+                game_state, tortellini_found = handle_fridge_minigame_events(event, fridge_minigame, game_state, tortellini_found, dialog_system)
             elif game_state == FIGHTING:
                 game_state = handle_fighting_events(event, player, dad, game_state)
-            
             elif game_state == GAME_OVER:
-                game_state, running = handle_game_over_events(
-                    event, player, dad, dialog_system, game_state)
+                game_state, running = handle_game_over_events(event, player, dad, dialog_system, game_state)
         
         # Clear the screen
         screen.fill(WHITE)
         
         # Update and draw based on game state
+        props = [fridge, table] + cabinets
+        
         if game_state == KITCHEN:
-            # Flatten cabinets into the props list
-            props = [fridge, table] + cabinets
-            # print(f"Props to render: {[prop.type for prop in props]}")  # Debugging
             game_state = update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state)
-            # Update kitchen state
-            fridge_collision = update_kitchen_state(screen, player, dad, kitchen, props, small_font, game_state)
-
+            
+            # Initialize fridge_minigame if transitioning to FRIDGE_MINIGAME
+            if game_state == FRIDGE_MINIGAME and fridge_minigame is None:
+                print("Initializing fridge_minigame...")
+                fridge_minigame = FridgeMinigame(WIDTH, HEIGHT, assets_path)
+                
             # Debounce for fridge interaction
             if fridge_collision_debounce > 0:
                 fridge_collision_debounce -= 1
@@ -489,9 +395,21 @@ def main():
         elif game_state == DIALOG:
             update_dialog_state(screen, player, dad, cabinets, table, fridge, dialog_system)
             
+            # Handle transition to fighting state
+            if game_state == FIGHTING:
+                # Reset positions for fight
+                player.x = WIDTH // 3
+                player.y = HEIGHT // 2
+                dad.x = 2 * WIDTH // 3
+                dad.y = HEIGHT // 2
+                
         elif game_state == FRIDGE_MINIGAME:
-            update_fridge_minigame_state(screen, fridge_items, tortellini_found, small_font, font)
-        
+            # Make sure fridge_minigame is initialized when we enter this state
+            if fridge_minigame is None:
+                print("Initializing fridge_minigame in update...")
+                fridge_minigame = FridgeMinigame(WIDTH, HEIGHT, assets_path)
+            update_fridge_minigame_state(screen, fridge_minigame, tortellini_found, small_font, font)
+            
         elif game_state == FIGHTING:
             game_state = update_fighting_state(screen, player, dad, cabinets, table, fridge, small_font)
                 
