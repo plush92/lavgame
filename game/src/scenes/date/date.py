@@ -106,64 +106,12 @@ class DatingApp:
         ]
         
     def create_profiles(self):
-        # Create default image paths - in a real game you would use actual images
-        img_dir = "profile_pics"
+        # Set the directory for profile pictures relative to this script's location
+        img_dir = os.path.join(os.path.dirname(__file__), "profile_pics")
         
-        # Try to create the directory if it doesn't exist
-        try:
-            if not os.path.exists(img_dir):
-                os.makedirs(img_dir)
-        except:
-            pass
-            
-        # Create placeholder images with colors for each profile
-        placeholders = {
-            "blonde": (255, 223, 196),  # Light skin tone
-            "brunette": (255, 200, 180),  # Medium skin tone
-            "split": (220, 175, 150),  # Darker skin tone
-            "goth": (240, 210, 190)  # Medium-light skin tone
-        }
-        
-        for name, color in placeholders.items():
-            img_path = f"{img_dir}/{name}.png"
-            try:
-                # Create a placeholder profile pic
-                surface = pygame.Surface((500, 350))
-                surface.fill(color)
-                
-                # Add hair color
-                hair_colors = {
-                    "blonde": (255, 215, 0),  # Gold
-                    "brunette": (100, 50, 0),  # Dark brown
-                    "split": (0, 0, 0),  # Will be overridden with split
-                    "goth": (0, 0, 0)  # Black
-                }
-                
-                # Draw hair
-                pygame.draw.ellipse(surface, hair_colors[name], (125, 30, 250, 120))
-                
-                # Draw split-dyed hair
-                if name == "split":
-                    pygame.draw.ellipse(surface, (255, 0, 255), (125, 30, 125, 120))  # Purple on one side
-                
-                # Draw face
-                face_color = color
-                pygame.draw.ellipse(surface, face_color, (175, 80, 150, 200))
-                
-                # Draw eyes
-                eye_color = (0, 128, 0) if name == "goth" else (50, 50, 200)  # Green eyes for goth
-                pygame.draw.ellipse(surface, WHITE, (200, 150, 30, 20))
-                pygame.draw.ellipse(surface, WHITE, (270, 150, 30, 20))
-                pygame.draw.ellipse(surface, eye_color, (210, 155, 10, 10))
-                pygame.draw.ellipse(surface, eye_color, (280, 155, 10, 10))
-                
-                # Draw mouth
-                pygame.draw.ellipse(surface, (255, 0, 0), (225, 200, 50, 20))
-                
-                # Save the image
-                pygame.image.save(surface, img_path)
-            except:
-                img_path = "placeholder.png"
+        # Ensure the directory exists
+        if not os.path.exists(img_dir):
+            raise FileNotFoundError(f"The directory '{img_dir}' does not exist.")
         
         # Create profiles
         self.profiles = [
@@ -178,7 +126,7 @@ class DatingApp:
                     "Is rapidly approaching 30 and not eager to be a mother",
                     "Wants something casual"
                 ],
-                f"{img_dir}/blonde.png"
+                os.path.join(img_dir, "blonde.png")
             ),
             Profile(
                 "Brunette", 26,
@@ -191,7 +139,7 @@ class DatingApp:
                     "Has an eating disorder",
                     "1 year away from hyper-religious psychosis"
                 ],
-                f"{img_dir}/brunette.png"
+                os.path.join(img_dir, "brunette.png")
             ),
             Profile(
                 "Split-Hair Dye", 24,
@@ -204,10 +152,10 @@ class DatingApp:
                     "Extremely high libido",
                     "4 months away from shaving her head"
                 ],
-                f"{img_dir}/split.png"
+                os.path.join(img_dir, "split.png")
             ),
             Profile(
-                "Goth (Lav)", 27,
+                "Goth", 25,
                 "Married. Content creator. If you can make me laugh, you've got my attention.",
                 [
                     "Has a husband",
@@ -222,7 +170,7 @@ class DatingApp:
                     "Makes you laugh",
                     "Reasonable to assume she will let you put it in her butt"
                 ],
-                f"{img_dir}/goth.png"
+                os.path.join(img_dir, "goth.png")
             )
         ]
         
