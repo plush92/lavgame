@@ -19,7 +19,7 @@ GREEN = (0, 200, 0)
 BLUE = (0, 0, 255)
 PURPLE = (128, 0, 128)
 PINK = (255, 105, 180)
-APP_BG = (248, 248, 248)
+APP_BG = (145, 70, 255)
 APP_HEADER = (255, 79, 91)
 LIGHT_BLUE = (100, 149, 237)
 BROWN = (139, 69, 19)
@@ -77,6 +77,9 @@ class DatingApp:
         self.intro_timer = 5 * FPS  # 5 seconds intro
         self.zoom_effect = 0  # For transition from bedroom to computer screen
         
+        # Load Twitch logo
+        self.twitch_logo = self.load_twitch_logo()
+
         # Create profiles
         self.create_profiles()
         
@@ -173,6 +176,17 @@ class DatingApp:
                 os.path.join(img_dir, "goth.png")
             )
         ]
+    
+    def load_twitch_logo(self):
+        """Load the Twitch logo."""
+        try:
+            logo_path = os.path.join(os.path.dirname(__file__), "twitchlogo.png")
+            logo = pygame.image.load(logo_path).convert_alpha()
+            logo = pygame.transform.scale(logo, (80, 80))  # Resize the logo
+            return logo
+        except pygame.error as e:
+            print(f"Error loading Twitch logo: {e}")
+            return None
         
     def handle_events(self):
         for event in pygame.event.get():
@@ -309,12 +323,13 @@ class DatingApp:
         # Draw app background
         self.screen.fill(APP_BG)
         
-        # Draw app header
-        pygame.draw.rect(self.screen, APP_HEADER, (0, 0, SCREEN_WIDTH, 60))
+        # Draw Twitch logo
+        if self.twitch_logo:
+            self.screen.blit(self.twitch_logo, (10, 10))  # Top-left corner
         
         # Draw app name
-        app_name = self.heading_font.render("SwipeMeet", True, WHITE)
-        self.screen.blit(app_name, (SCREEN_WIDTH//2 - app_name.get_width()//2, 15))
+        app_name = self.heading_font.render("TWITCH", True, WHITE)
+        self.screen.blit(app_name, (SCREEN_WIDTH // 2 - app_name.get_width() // 2, 15))
     
     def wrap_text(self, text, font, max_width):
         words = text.split(' ')
