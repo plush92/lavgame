@@ -32,9 +32,9 @@ class Character:
         self.x = x
         self.y = y
         self.color = color
-        self.width = 75
-        self.height = 75
-        self.speed = 4
+        self.width = 120
+        self.height = 120
+        self.speed = 5
         self.health = 100
         self.is_player = is_player
         self.punching = False

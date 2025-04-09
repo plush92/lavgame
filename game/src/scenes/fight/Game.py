@@ -20,6 +20,7 @@ class Game:
 
         # Initialize game objects
         self.dialog_system, self.player, self.dad, self.kitchen, self.props = KitchenProp.create_game_objects()
+        self.dialog_system.dialogs = self.dialog_system.dialog_first  # Start with dialog_first
         self.fridge_minigame = None
         self.tortellini_found = False
 
@@ -36,6 +37,8 @@ class Game:
 
     def change_state(self, state_name):
         """Change the current game state."""
+        if state_name == "KITCHEN_SECOND":
+            self.dialog_system.dialogs = self.dialog_system.dialog_second  # Switch to dialog_second
         self.current_state = self.states[state_name]
 
     def handle_events(self, event):

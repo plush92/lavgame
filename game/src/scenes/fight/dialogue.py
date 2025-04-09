@@ -41,6 +41,7 @@ class DialogSystem:
 
         self.dialog_second = [
             #Open fridge to look for tortellini*
+            {"speaker": "Tim", "text": "Found it!"},
             {"speaker": "Dad", "text": "You've done some innocuous thing that has made me irrationally angry!"},
             {"speaker": "Tim", "text": "Your anger has made me angry!"},
             {"speaker": "Dad", "text": "You are my son you must obey me!"},
@@ -49,7 +50,7 @@ class DialogSystem:
             {"speaker": "Tim", "text": "And because you don't, I never learned them either and so my anger is also building!"},
             {"speaker": "Dad", "text": "Ahhh!"},
             {"speaker": "Tim", "text": "Grrrr!"},
-            {"speaker": "Narrator", "text": "Fight ensues..."},
+            # {"speaker": "Narrator", "text": "Fight ensues..."},
         ]
 
         self.dialogs = self.dialog_first
@@ -69,34 +70,6 @@ class DialogSystem:
         dialog = self.dialogs[self.dialog_index] # Get the current dialog
         speaker_name = dialog["speaker"] # Get the speaker's name
         text = dialog["text"] # Get the text to display
-
-        # Get the character instance for the speaker
-        character = characters.get(speaker_name, None)
-
-        # Create and draw the speech bubble
-        if character:
-            bubble = SpeechBubble(character, text, self.font)
-            bubble.draw(surface)
-        else:
-            print(f"Warning: Character '{speaker_name}' not found for dialogue.")
-
-        return True
-
-    def draw(self, surface, characters):
-        """
-        Draw the current dialogue using the SpeechBubble class.
-
-        Args:
-            surface (pygame.Surface): The surface to draw on.
-            characters (dict): A dictionary mapping character names to their instances.
-        """
-        if not self.active or self.dialog_index >= len(self.dialogs):
-            return False
-
-        # Get the current dialogue
-        dialog = self.dialogs[self.dialog_index]
-        speaker_name = dialog["speaker"]
-        text = dialog["text"]
 
         # Get the character instance for the speaker
         character = characters.get(speaker_name, None)

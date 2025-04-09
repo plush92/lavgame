@@ -5,9 +5,13 @@ class FridgeMinigameScene:
         self.fridge_minigame = FridgeMinigame(screen_width, screen_height, background_image_path)
 
     def handle_events(self, event, game):
-        """Delegate event handling to the FridgeMinigame instance."""
+        """Handle events for the fridge minigame."""
         if self.fridge_minigame.handle_events(event):
-            # Transition to the next state when tortellini is found
+            # Tortellini found, transition to KitchenSecondScene
+            print("Tortellini found!")
+            game.dialog_system.dialogs = game.dialog_system.dialog_second  # Switch to dialog_second
+            game.dialog_system.dialog_index = 0  # Reset dialogue index
+            game.dialog_system.active = True  # Activate dialogue system
             game.change_state("KITCHEN_SECOND")
 
     def update(self, game):
