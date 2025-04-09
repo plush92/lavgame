@@ -2,6 +2,7 @@ import pygame
 import random
 import math
 import sys
+from src.scenes.fight.speechbubble import SpeechBubble
 
 # Colors
 WHITE = (255, 255, 255)
@@ -31,11 +32,15 @@ class DialogSystem:
         self.small_font = pygame.font.Font(None, 24)
         self.dialog_index = 0
         self.active = True
-        self.dialogs = [
-            {"speaker": "Tim", "text": "Oh hey dad"},
+        self.dialog_first = [
+            {"speaker": "Tim", "text": "So hungry. Can't wait to eat some tortellini!"},
+            {"speaker": "Tim", "text": "...Oh, hey dad"},
             {"speaker": "Dad", "text": "The prodigal son! I am a god and therefore you are the messiah, oh anointed one!"},
-            {"speaker": "Tim", "text": "I am actually better and stronger than you"},
-            {"speaker": "Tim", "text": "*opens fridge to look for tortellini*"},
+            {"speaker": "Tim", "text": "I am actually better and stronger than you"}
+        ]
+
+        self.dialog_second = [
+            #Open fridge to look for tortellini*
             {"speaker": "Dad", "text": "You've done some innocuous thing that has made me irrationally angry!"},
             {"speaker": "Tim", "text": "Your anger has made me angry!"},
             {"speaker": "Dad", "text": "You are my son you must obey me!"},
@@ -47,56 +52,77 @@ class DialogSystem:
             {"speaker": "Narrator", "text": "Fight ensues..."},
         ]
 
-    def draw(self, surface):
+        self.dialogs = self.dialog_first
+
+    def draw(self, surface, characters):
+        """
+        Draw the current dialogue using the SpeechBubble class.
+
+        Args:
+            surface (pygame.Surface): The surface to draw on.
+            characters (dict): A dictionary mapping character names to their instances.
+        """
+        if not self.active or self.dialog_index >= len(self.dialogs): # Check if dialog is active and index is valid
+            return False
+
+        # Get the current dialogue
+        dialog = self.dialogs[self.dialog_index] # Get the current dialog
+        speaker_name = dialog["speaker"] # Get the speaker's name
+        text = dialog["text"] # Get the text to display
+
+        # Get the character instance for the speaker
+        character = characters.get(speaker_name, None)
+
+        # Create and draw the speech bubble
+        if character:
+            bubble = SpeechBubble(character, text, self.font)
+            bubble.draw(surface)
+        else:
+            print(f"Warning: Character '{speaker_name}' not found for dialogue.")
+
+        return True
+
+    def draw(self, surface, characters):
+        """
+        Draw the current dialogue using the SpeechBubble class.
+
+        Args:
+            surface (pygame.Surface): The surface to draw on.
+            characters (dict): A dictionary mapping character names to their instances.
+        """
         if not self.active or self.dialog_index >= len(self.dialogs):
             return False
-            
-        # Dialog box
-        box_height = 150
-        pygame.draw.rect(surface, WHITE, (50, self.height - box_height - 50, self.width - 100, box_height))
-        pygame.draw.rect(surface, BLACK, (50, self.height - box_height - 50, self.width - 100, box_height), 2)
-        
+
+        # Get the current dialogue
         dialog = self.dialogs[self.dialog_index]
-        
-        # Speaker label
-        speaker_color = BLUE if dialog["speaker"] == "Tim" else RED if dialog["speaker"] == "Dad" else GREEN
-        speaker_text = self.font.render(dialog["speaker"] + ":", True, speaker_color)
-        surface.blit(speaker_text, (70, self.height - box_height - 40))
-        
-        # Dialog text - with word wrap
-        words = dialog["text"].split(' ')
-        line = ""
-        y_offset = 0
-        for word in words:
-            test_line = line + word + " "
-            text_width = self.font.size(test_line)[0]
-            if text_width < self.width - 150:
-                line = test_line
-            else:
-                text = self.font.render(line, True, BLACK)
-                surface.blit(text, (70, self.height - box_height - 5 + y_offset))
-                y_offset += 30
-                line = word + " "
-        
-        text = self.font.render(line, True, BLACK)
-        surface.blit(text, (70, self.height - box_height - 5 + y_offset))
-        
-        # Continue prompt
-        continue_text = self.small_font.render("Press SPACE to continue...", True, GRAY)
-        surface.blit(continue_text, (self.width - 230, self.height - 80))
-        
+        speaker_name = dialog["speaker"]
+        text = dialog["text"]
+
+        # Get the character instance for the speaker
+        character = characters.get(speaker_name, None)
+
+        # Create and draw the speech bubble
+        if character:
+            bubble = SpeechBubble(character, text, self.font)
+            bubble.draw(surface)
+        else:
+            print(f"Warning: Character '{speaker_name}' not found for dialogue.")
+
         return True
 
     def next_dialog(self):
-        self.dialog_index += 1
-        if self.dialog_index >= len(self.dialogs):
-            self.active = False
-            return False
-        
-        # Special handling: When reaching the fridge dialog, trigger fridge minigame
-        if self.dialog_index == 3:  # *opens fridge to look for tortellini*
-            return "FRIDGE_MINIGAME"
-        elif self.dialog_index == len(self.dialogs) - 1:  # Fight ensues
-            return "FIGHTING"
-        
-        return True
+            """
+            Advance to the next dialogue in the sequence.
+
+            Returns:
+                str or None: A string indicating the next game state (e.g., "FIGHTING"),
+                            or None if there is no special transition.
+            """
+            if self.dialog_index < len(self.dialogs) - 1:
+                self.dialog_index += 1
+                print(f"Advancing to dialogue index {self.dialog_index}")  # Debugging
+                return None  # No special transition
+            else:
+                self.active = False  # End of dialogue
+                print("Dialogue finished.")  # Debugging
+                return "FIGHTING"  # Example: Transition to the fighting state

@@ -2,7 +2,7 @@ import pygame
 import sys
 from src.level_select import level_select
 from src.scenes.intro import start_intro  # Import IntroScene class
-from src.scenes.fight.fight import start_fight  # Import FightScene class
+from src.scenes.fight.Game import start_fight  # Import FightScene class
 from src.scenes.driving.driving import start_driving  # Import DrivingScene class
 from src.scenes.bar.game import start_bar  # Import BarScene class
 from src.scenes.date.date import start_date  # Import DateScene class

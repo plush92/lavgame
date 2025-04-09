@@ -39,15 +39,14 @@ WIDTH, HEIGHT = 800, 600
 # Kitchen Props Class
 # Items around the kitchen for collision detection
 class KitchenProp:
-    def __init__(self, x, y, width, height, color, prop_type, image_path=None, render_image=False):
-        self.x = x # X position of the prop
-        self.y = y # Y position of the prop
-        self.width = width # Width of the prop
-        self.height = height # Height of the prop
-        self.color = color # Color of the prop
+    def __init__(self, x, y, width, height, prop_type, image_path=None, render_image=False):
+        self.x = x  # X position of the prop
+        self.y = y  # Y position of the prop
+        self.width = width  # Width of the prop
+        self.height = height  # Height of the prop
         self.type = prop_type  # "fridge", "table", "cabinet"
-        self.image = None # Image of the prop
-        self.render_image = render_image # Whether to render the image or not
+        self.image = None  # Image of the prop
+        self.render_image = render_image  # Whether to render the image or not
         if image_path:
             self.load_image(image_path)
 
@@ -66,21 +65,18 @@ class KitchenProp:
         Args:
             surface (pygame.Surface): The surface to draw on.
         """
-        # Draw the collision box as a red outline
-        pygame.draw.rect(surface, RED, (self.x, self.y, self.width, self.height), 2)
-
-        # Optionally, display the type of the prop
-        # font = pygame.font.Font(None, 24)
-        # text_surface = font.render(self.type, True, WHITE)
-        # text_rect = text_surface.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
-        # surface.blit(text_surface, text_rect)
+        pygame.draw.rect(surface, (255, 0, 0), (self.x, self.y, self.width, self.height), 2)  # Red outline
 
     def draw(self, surface):
         """
-        Draws the prop as a rectangle for debugging purposes.
+        Draws the prop only if it has an image or for debugging purposes.
         """
-        pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height))
-        
+        if self.render_image and self.image:
+            surface.blit(self.image, (self.x, self.y))  # Draw the image if available
+        else:
+            # Skip drawing if no image and not debugging
+            pass
+
     def check_collision(self, x, y, width, height):
         return (self.x < x + width and
                 self.x + self.width > x and
@@ -101,10 +97,10 @@ class KitchenProp:
         
         # Define collision props (manually eyeballed positions)
         #(x, y, width, height) - make slightly smaller to account for player box
-        door = KitchenProp(665, 25, 90, 180, RED, "door")  #original 111, 202
-        table = KitchenProp(275, 325, 240, 110, GREEN, "table")  #original 309, 142
-        fridge = KitchenProp(710, 300, 50, 200, BLUE, "fridge") # original 88, 223
-        floor = KitchenProp(100, 272, 675, 290, LIGHT_GRAY, "floor")  # original 728, 368
+        door = KitchenProp(665, 25, 90, 180, prop_type="door")  #x, y, width, height, color, type
+        table = KitchenProp(275, 325, 240, 110, prop_type="table")  #original 309, 142
+        fridge = KitchenProp(710, 300, 50, 200, prop_type="fridge") # original 88, 223
+        floor = KitchenProp(100, 272, 675, 290, prop_type="floor")  # original 728, 368
 
         props = [door, table, fridge, floor]
         # Return all objects

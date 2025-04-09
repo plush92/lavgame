@@ -72,6 +72,12 @@ class FridgeMinigame:
                 other_image = random.choice(other_images)
                 self.fridge_items.append(FridgeItem(x, y, "other", other_image))
 
+    def reset(self):
+        """Reset the fridge minigame."""
+        self.tortellini_found = False
+        self.fridge_items = []
+        self.setup_items()
+
     def draw(self, surface):
         """Draw the fridge minigame."""
         # Draw the fridge background
@@ -96,7 +102,7 @@ class FridgeMinigame:
             found_text = font.render("Found it!", True, (0, 255, 0))
             surface.blit(found_text, (self.screen_width // 2 - found_text.get_width() // 2, self.screen_height // 2 - 50))
 
-    def handle_event(self, event):
+    def handle_events(self, event, game=None):
         """Handle events for the fridge minigame."""
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Check if mouse is over any item
@@ -111,3 +117,12 @@ class FridgeMinigame:
                     else:
                         print("Wrong item clicked!")  # Debugging
         return False  # Tortellini not found
+
+    def update(self, game):
+        """Update the fridge minigame."""
+        # No specific updates needed for now
+        pass
+
+    def is_complete(self):
+        """Check if the minigame is complete."""
+        return self.tortellini_found
