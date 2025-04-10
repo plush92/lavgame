@@ -7,7 +7,7 @@ from src.scenes.date.date import start_date  # Import DateScene class
 from src.scenes.vegas.vegas import start_vegas  # Import VegasScene class
 from src.scenes.driving.driving import start_driving  # Import DrivingScene class
 from src.scenes.home import start_home  # Import HomeScene class
-from src.scenes.end import start_end  # Import EndScene class
+from src.scenes.meadow.main import start_end  # Import EndScene class
 
 WIDTH, HEIGHT = 800, 600  # Screen size
 WINDOW_SIZE = (WIDTH, HEIGHT)  # Window size

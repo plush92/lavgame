@@ -328,7 +328,7 @@ class DatingApp:
             self.screen.blit(self.twitch_logo, (10, 10))  # Top-left corner
         
         # Draw app name
-        app_name = self.heading_font.render("TWITCH", True, WHITE)
+        app_name = self.heading_font.render("BROWSE", True, WHITE)
         self.screen.blit(app_name, (SCREEN_WIDTH // 2 - app_name.get_width() // 2, 15))
     
     def wrap_text(self, text, font, max_width):
@@ -409,7 +409,7 @@ class DatingApp:
         # Draw button text
         left_text = self.heading_font.render("✕", True, WHITE)
         right_text = self.heading_font.render("→", True, WHITE)
-        like_text = self.text_font.render("MATCH", True, WHITE)
+        like_text = self.text_font.render("SELECT", True, WHITE)
 
         self.screen.blit(left_text, (self.left_button.centerx - left_text.get_width()//2, 
                                     self.left_button.centery - left_text.get_height()//2))
@@ -428,7 +428,7 @@ class DatingApp:
         trait_surface = pygame.Surface((trait_panel_width, trait_panel_height))
         trait_surface.fill(LIGHT_GRAY)
         
-        title_text = self.small_font.render("Profile Details:", True, BLACK)
+        title_text = self.small_font.render("About:", True, BLACK)
         trait_surface.blit(title_text, (10, 10))
         
         # Use smaller font for traits to fit more
@@ -512,7 +512,7 @@ class DatingApp:
             self.screen.blit(text, (button.centerx - text.get_width()//2, 
                                    button.centery - text.get_height()//2))
     
-    def draw_selected(self):
+    def draw_selected(self): # Draw the final selected profile screen
         # Draw celebratory screen
         self.screen.fill(PINK)
         
