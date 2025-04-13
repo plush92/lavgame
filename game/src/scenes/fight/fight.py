@@ -7,7 +7,7 @@ from src.scenes.fight.dialogue import DialogSystem
 from src.scenes.fight.fridgeitem import FridgeItem
 from src.scenes.fight.kitchenprop import KitchenProp
 from src.scenes.fight.kitchen import Kitchen
-from src.scenes.fight.fridgeminigame import FridgeMinigame
+from src.scenes.fight.FridgeMiniGame import FridgeMinigame
 from src.scenes.fight.speechbubble import SpeechBubble
 import os
 
