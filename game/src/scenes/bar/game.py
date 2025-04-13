@@ -45,10 +45,25 @@ player_bar_area_start_y = SCREEN_HEIGHT // 2
 player_maze_start_x = 150
 player_maze_start_y = 150
 
+patron_images = [
+    "src/scenes/bar/blonde.png",
+    "src/scenes/bar/charizard.png",
+    "src/scenes/bar/doom_guy.png",
+    "src/scenes/bar/girl_patron1.png",
+    "src/scenes/bar/girl_patron2.png",
+    "src/scenes/bar/girl_patron3.png",
+    "src/scenes/bar/guy_patron1.png",
+    "src/scenes/bar/guy_patron2.png",
+    "src/scenes/bar/guy_patron3.png",
+    "src/scenes/bar/link.png",
+    "src/scenes/bar/split_dye.png"
+]
+
 class Game:
     def __init__(self):
         # Start player in the bar area
         self.player = Player(player_bar_area_start_x, player_bar_area_start_y)
+        self.player.load_image("src/scenes/bar/tim.png")
         
         # Create walls
         self.walls = WALLS
@@ -74,10 +89,10 @@ class Game:
         
         # Add fanny pack and hometown skanks to collect
         self.collectables = [
-            Collectable(150, 150, "fanny_pack", YELLOW),
-            Collectable(350, 250, "skank", PINK),
-            Collectable(550, 350, "skank", PINK),
-            Collectable(250, 450, "skank", PINK)
+            Collectable(150, 150, "fanny_pack", image_path="src/scenes/bar/fanny_pack.png"),
+            Collectable(350, 225, "skank", image_path="src/scenes/bar/skank1.png"),
+            Collectable(550, 350, "skank", image_path="src/scenes/bar/skank2.png"),
+            Collectable(250, 425, "skank", image_path="src/scenes/bar/skank3.png")
         ]
         
         # Tracking what's been collected
@@ -92,6 +107,7 @@ class Game:
         # Bar scene setup
         self.bar_counter = pygame.Rect(50, 100, 500, 30)
         self.bartender = Bartender(300, 70)
+        self.bartender.load_image("src/scenes/bar/teddanson.png")
         
         # Bar stools
         self.bar_stools = []
@@ -107,12 +123,16 @@ class Game:
         
         # Bar patrons
         self.bar_patrons = []
-        patron_colors = [RED, BLUE, GREEN, YELLOW, PINK, WHITE]
-        for i in range(8):
-            x = random.randint(100, SCREEN_WIDTH - 100)
-            y = random.randint(200, SCREEN_HEIGHT - 100)
-            color = random.choice(patron_colors)
-            self.bar_patrons.append(BarPatron(x, y, color))
+        for i in range(len(patron_images)):
+            x = random.randint(50, SCREEN_WIDTH - 50)
+            y = random.randint(50, SCREEN_HEIGHT - 50)
+            self.bar_patrons.append(BarPatron(x, y, (255, 255, 255), image_path=patron_images[i], image_size=(50, 50)))
+        # patron_colors = [RED, BLUE, GREEN, YELLOW, PINK, WHITE]
+        # for i in range(8):
+        #     x = random.randint(100, SCREEN_WIDTH - 100)
+        #     y = random.randint(200, SCREEN_HEIGHT - 100)
+        #     color = random.choice(patron_colors)
+        #     self.bar_patrons.append(BarPatron(x, y, color))
         
         # Drinks on the counter
         self.drinks = []
@@ -190,9 +210,10 @@ class Game:
                 pygame.draw.rect(screen, GOLD, drink)
             
             # Draw the player
-            pygame.draw.rect(screen, WHITE, self.player.rect)
-            pygame.draw.circle(screen, WHITE, (self.player.rect.centerx, self.player.rect.top - 5), 10)
-            
+            # pygame.draw.rect(screen, WHITE, self.player.rect)
+            # pygame.draw.circle(screen, WHITE, (self.player.rect.centerx, self.player.rect.top - 5), 10)
+            self.player.draw(screen)
+            self.player.move()
             # Draw current drink if drinking
             if self.current_drink:
                 drink_y = self.player.rect.y - 25 + self.drinking_animation
@@ -225,13 +246,14 @@ class Game:
             screen.blit(scaled_exit_image, (self.exit.x, self.exit.y))
             
             # Draw collectables
-            for item in self.collectables:
-                if not item.collected:
-                    item.draw(screen)
+            for collectable in self.collectables:
+                collectable.draw(screen)
 
             # Draw player
+            self.player.resize_image(30, 30)
+            self.player.draw(screen)
             # surface, color, rect, width
-            pygame.draw.rect(screen, WHITE, self.player.rect)
+            # pygame.draw.rect(screen, WHITE, self.player.rect)
 
             # Draw bouncer
             self.bouncer.draw(screen)
@@ -290,22 +312,22 @@ class Game:
             screen.fill(BLACK)
             
             # Victory text
-            victory_text = font.render("YOU ESCAPED!", True, GREEN)
-            screen.blit(victory_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50))
+            victory_text = font.render("Found my fanny pack! And three skanks!", True, GREEN)
+            screen.blit(victory_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 - 50))
             
             # Victory message
-            if self.skanks_collected >= self.total_skanks:
-                message = f"You found your fanny pack and all {self.total_skanks} hometown skanks!"
-            elif self.fanny_pack_collected:
-                message = f"You found your fanny pack but only {self.skanks_collected} skanks. Better than nothing!"
-            else:
-                message = "You escaped, but forgot your fanny pack. Oh well!"
+            # if self.skanks_collected >= self.total_skanks:
+            #     message = f"You found your fanny pack and all {self.total_skanks} hometown skanks!"
+            # elif self.fanny_pack_collected:
+            #     message = f"You found your fanny pack but only {self.skanks_collected} skanks. Better than nothing!"
+            # else:
+            #     message = "You escaped, but forgot your fanny pack. Oh well!"
                 
-            message_text = small_font.render(message, True, WHITE)
-            screen.blit(message_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2))
+            # message_text = small_font.render(message, True, WHITE)
+            # screen.blit(message_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2))
             
             # Restart instructions
-            restart_text = small_font.render("Press R to restart or Q to quit", True, WHITE)
+            restart_text = small_font.render("Press SPACE to continue", True, WHITE)
             screen.blit(restart_text, (SCREEN_WIDTH // 2 - 120, SCREEN_HEIGHT // 2 + 50))
 
         pygame.display.flip()
@@ -436,6 +458,7 @@ class Game:
     def update(self):
         if self.game_state == 'bar':
             # Update bar patrons
+
             for patron in self.bar_patrons:
                 patron.update(self.bar_area)
                 

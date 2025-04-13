@@ -13,14 +13,30 @@ pygame.display.set_caption("Bar Escape: Hometown Honkey Tonk")
 WALLS = create_labyrinth_walls()
 
 class BarPatron:
-    def __init__(self, x, y, color):
-        self.rect = pygame.Rect(x, y, 20, 30)
+    def __init__(self, x, y, color, image_path=None, image_size=(20, 30)):
+        self.rect = pygame.Rect(x, y, image_size[0], image_size[1])
         self.color = color
+        self.image = None  # Placeholder for the patron's image
+        self.image_size = image_size  # Default size for scaling
         self.moving = random.choice([True, False])
         self.direction = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
         self.move_timer = 0
         self.move_interval = random.randint(30, 120)  # Frames between direction changes
-    
+
+        # Load the image if a path is provided
+        if image_path:
+            self.load_image(image_path, image_size)
+
+    def load_image(self, image_path, image_size):
+        """Load the patron's image from the specified file path and scale it."""
+        try:
+            self.image = pygame.image.load(image_path).convert_alpha()  # Load image with transparency
+            self.image = pygame.transform.scale(self.image, image_size)  # Scale the image
+            self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))  # Update rect to match image size
+        except pygame.error as e:
+            print(f"Error loading image: {e}")
+            sys.exit(1)  # Exit the program if the image fails to load
+
     def update(self, bar_area):
         if not self.moving:
             self.move_timer += 1
@@ -53,7 +69,10 @@ class BarPatron:
             self.move_interval = random.randint(30, 120)
     
     def draw(self, screen):
-        # Draw body
-        pygame.draw.rect(screen, self.color, self.rect)
-        # Draw head
-        pygame.draw.circle(screen, self.color, (self.rect.centerx, self.rect.top - 5), 10)
+        """Draw the patron on the screen."""
+        if self.image:
+            screen.blit(self.image, self.rect)  # Draw the image if loaded
+        else:
+            # Fallback: Draw a rectangle and a circle if no image is loaded
+            pygame.draw.rect(screen, self.color, self.rect)
+            pygame.draw.circle(screen, self.color, (self.rect.centerx, self.rect.top - 5), 10)
