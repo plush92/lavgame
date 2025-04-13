@@ -34,6 +34,15 @@ class Game:
         }
         self.current_state = self.states["KITCHEN_FIRST"]
         self.running = True
+    
+    def show_intro_screen(self):
+        """Display a black screen with the text 'With Dad...' before the game starts."""
+        self.screen.fill((0, 0, 0))  # Fill the screen with black
+        intro_text = self.font.render("With Dad...", True, (255, 255, 255))  # White text
+        text_rect = intro_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
+        self.screen.blit(intro_text, text_rect)  # Draw the text on the screen
+        pygame.display.flip()  # Update the display
+        pygame.time.delay(2000)  # Pause for 2 seconds
 
     def change_state(self, state_name):
         """Change the current game state."""
@@ -55,6 +64,7 @@ class Game:
 
     def run(self):
         """Main game loop."""
+        self.show_intro_screen()  # Show the intro screen before starting the game
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

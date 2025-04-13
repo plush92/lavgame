@@ -108,5 +108,21 @@ class FightScene(GameState):
         game.dad.draw(screen)
 
         # Draw instruction text
-        fight_instruction = game.small_font.render("Arrow keys to move, SPACE to punch!", True, (0, 0, 0))
-        screen.blit(fight_instruction, (screen.get_width() // 2 - fight_instruction.get_width() // 2, screen.get_height() - 30))
+
+        fight_instruction = game.small_font.render("Fight your dad! Arrow keys to move, SPACE to punch!", True, (0, 0, 0))
+        # Draw instruction text with a transparent purple border
+        instruction_box_width = fight_instruction.get_width() + 20
+        instruction_box_height = fight_instruction.get_height() + 10
+        instruction_box_x = (screen.get_width() // 2) - (instruction_box_width // 2)
+        instruction_box_y = screen.get_height() - 50
+
+        # Create a semi-transparent purple background
+        instruction_box_surface = pygame.Surface((instruction_box_width, instruction_box_height), pygame.SRCALPHA)
+        instruction_box_surface.fill((128, 0, 128, 100))  # Semi-transparent purple
+        screen.blit(instruction_box_surface, (instruction_box_x, instruction_box_y))
+
+        # Draw a subtle light purple border
+        pygame.draw.rect(screen, (200, 200, 255), (instruction_box_x, instruction_box_y, instruction_box_width, instruction_box_height), 2)
+
+        # Blit the fight instruction text
+        screen.blit(fight_instruction, (screen.get_width() // 2 - fight_instruction.get_width() // 2, screen.get_height() - 45))

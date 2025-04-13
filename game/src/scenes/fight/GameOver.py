@@ -23,7 +23,7 @@ class GameOver(GameState):
         # Display the game over message
         font = pygame.font.Font(None, 48)
         message = font.render("You killed your dad! Congratulations!", True, (255, 255, 255))
-        restart_message = font.render("Press R to restart or Q to quit.", True, (255, 255, 255))
+        restart_message = font.render("Press SPACE to continue", True, (255, 255, 255))
 
         # Center the messages on the screen
         screen.blit(message, 
