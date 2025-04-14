@@ -316,7 +316,7 @@ class DatingApp:
             
             # Draw "zooming in" text
             if self.zoom_effect > 50:
-                zoom_text = self.text_font.render("Loading dating app...", True, WHITE)
+                zoom_text = self.text_font.render("Loading...", True, WHITE)
                 self.screen.blit(zoom_text, (SCREEN_WIDTH//2 - zoom_text.get_width()//2, 500))
     
     def draw_app_frame(self):
@@ -532,7 +532,7 @@ class DatingApp:
         self.screen.blit(name_text, (SCREEN_WIDTH//2 - name_text.get_width()//2, 430))
         
         # Draw continue message
-        continue_text = self.text_font.render("Press any key to continue your journey...", True, BLACK)
+        continue_text = self.text_font.render("Press SPACE to continue", True, BLACK)
         self.screen.blit(continue_text, (SCREEN_WIDTH//2 - continue_text.get_width()//2, 500))
     
     def draw(self):
