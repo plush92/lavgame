@@ -9,7 +9,6 @@ from src.scenes.fight.dialogue import DialogSystem
 from src.scenes.fight.fridgeitem import FridgeItem
 from src.scenes.fight.kitchen import Kitchen
 
-
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
