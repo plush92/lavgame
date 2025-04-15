@@ -14,7 +14,8 @@ SPAWN_RATE = 40
 class PreGameScene:
     """Displays a convertible moving across the screen."""
     def __init__(self):
-        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+        # Correct path to assets directory
+        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src/assets"))
         
         # Load and scale convertible
         self.convertible = pygame.image.load(os.path.join(assets_dir, "convertibleright.png"))
@@ -64,7 +65,7 @@ class PreGameScene:
 
     def load_highway_background(self):
         """Loads and scales the highway background image."""
-        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src/assets"))  # Correct path
         highway_path = os.path.join(assets_dir, "highway.jpeg")
         
         try:
@@ -77,8 +78,8 @@ class PreGameScene:
             exit()
     
     def load_highway_background_front(self):
-        """Loads and scales the highway background image."""
-        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+        """Loads and scales the highway background front image."""
+        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src/assets"))  # Correct path
         highway_path = os.path.join(assets_dir, "highwaybackgroundfront.png")
         
         try:
@@ -86,7 +87,7 @@ class PreGameScene:
             highway_background = pygame.transform.scale(highway_background, (WIDTH, HEIGHT))  # Scale to fit screen
             return highway_background
         except pygame.error as e:
-            print(f"Error loading highway background: {e}")
+            print(f"Error loading highway background front: {e}")
             pygame.quit()
             exit()
 
@@ -116,7 +117,7 @@ class PreGameScene:
 
     def show_convertible_front(self):
         """Displays a screen with the convertible front image and a speech bubble for the text."""
-        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+        assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src/assets"))
         convertible_front = pygame.image.load(os.path.join(assets_dir, "convertiblefront.png"))
         convertible_front = pygame.transform.scale(convertible_front, (250, 150))  # Scale the image
         convertible_front_rect = convertible_front.get_rect(center=(WIDTH // 2 - 120, HEIGHT // 2 + 140))
