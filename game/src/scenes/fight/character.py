@@ -45,10 +45,18 @@ class Character:
         if image_path:
             self.load_image(image_path)
 
+    @staticmethod
+    def resource_path(relative_path):
+        """Get the absolute path to a resource, works for dev and PyInstaller."""
+        if hasattr(sys, '_MEIPASS'):
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)
+
     def load_image(self, path):
         try:
-            # Construct the full path to the image
-            full_path = os.path.join(assets_dir, path)
+            # Construct the full path to the image using resource_path
+            full_path = self.resource_path(os.path.join("src/assets", path))
             self.image = pygame.image.load(full_path).convert_alpha()
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
             # Create flipped version for left direction

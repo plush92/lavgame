@@ -1,6 +1,7 @@
 import pygame  # Import the Pygame library for graphics and game development
 import random  # Import random for potential randomness in behavior (not used yet)
 import math  # Import math for angle calculations
+import os
 
 # Screen Setup
 SCREEN_WIDTH = 800  # Define screen width

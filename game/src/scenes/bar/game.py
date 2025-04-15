@@ -46,24 +46,24 @@ player_maze_start_x = 150
 player_maze_start_y = 150
 
 patron_images = [
-    "src/scenes/bar/blonde.png",
-    "src/scenes/bar/charizard.png",
-    "src/scenes/bar/doom_guy.png",
-    "src/scenes/bar/girl_patron1.png",
-    "src/scenes/bar/girl_patron2.png",
-    "src/scenes/bar/girl_patron3.png",
-    "src/scenes/bar/guy_patron1.png",
-    "src/scenes/bar/guy_patron2.png",
-    "src/scenes/bar/guy_patron3.png",
-    "src/scenes/bar/link.png",
-    "src/scenes/bar/split_dye.png"
+    "src/assets/blonde.png",
+    "src/assets/charizard.png",
+    "src/assets/doom_guy.png",
+    "src/assets/girl_patron1.png",
+    "src/assets/girl_patron2.png",
+    "src/assets/girl_patron3.png",
+    "src/assets/guy_patron1.png",
+    "src/assets/guy_patron2.png",
+    "src/assets/guy_patron3.png",
+    "src/assets/link.png",
+    "src/assets/split_dye.png"
 ]
 
 class Game:
     def __init__(self):
         # Start player in the bar area
         self.player = Player(player_bar_area_start_x, player_bar_area_start_y)
-        self.player.load_image("src/scenes/bar/tim.png")
+        self.player.load_image("src/assets/tim.png")
         
         # Create walls
         self.walls = WALLS
@@ -72,7 +72,7 @@ class Game:
         self.exit = pygame.Rect(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, 30, 30)
         
         # Place bouncer at a different location
-        self.bouncer = Bouncer(SCREEN_WIDTH - 200, 200, image_path=("assets/bouncer.png"))
+        self.bouncer = Bouncer(SCREEN_WIDTH - 200, 200, image_path=("src/assets/bouncer.png"))
         
         # Game state and dialogue setup
         self.game_state = 'bar'
@@ -89,10 +89,10 @@ class Game:
         
         # Add fanny pack and hometown skanks to collect
         self.collectables = [
-            Collectable(150, 150, "fanny_pack", image_path="src/scenes/bar/fanny_pack.png"),
-            Collectable(350, 225, "skank", image_path="src/scenes/bar/skank1.png"),
-            Collectable(550, 350, "skank", image_path="src/scenes/bar/skank2.png"),
-            Collectable(250, 425, "skank", image_path="src/scenes/bar/skank3.png")
+            Collectable(150, 150, "fanny_pack", image_path="src/assets/fanny_pack.png"),
+            Collectable(350, 225, "skank", image_path="src/assets/skank1.png"),
+            Collectable(550, 350, "skank", image_path="src/assets/skank2.png"),
+            Collectable(250, 425, "skank", image_path="src/assets/skank3.png")
         ]
         
         # Tracking what's been collected
@@ -107,7 +107,7 @@ class Game:
         # Bar scene setup
         self.bar_counter = pygame.Rect(50, 100, 500, 30)
         self.bartender = Bartender(300, 70)
-        self.bartender.load_image("src/scenes/bar/teddanson.png")
+        self.bartender.load_image("src/assets/teddanson.png")
         
         # Bar stools
         self.bar_stools = []
@@ -241,7 +241,7 @@ class Game:
                 pygame.draw.rect(screen, GRAY, wall)
 
             # Draw exit
-            exit_image = pygame.image.load("assets/exit.png")
+            exit_image = pygame.image.load("src/assets/exit.png")
             scaled_exit_image = pygame.transform.scale(exit_image, (30, 30))
             screen.blit(scaled_exit_image, (self.exit.x, self.exit.y))
             

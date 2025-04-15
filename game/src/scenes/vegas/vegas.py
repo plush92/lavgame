@@ -52,7 +52,7 @@ FLASH_DURATION = 500  # ms
 DIALOGUE_SPEED = 2400  # milliseconds
 
 # Casino background image
-casino_image = pygame.image.load("assets/casino.png")
+casino_image = pygame.image.load("src/assets/casino.png")
 
 # Screen shaker
 screen_shaker = ScreenShaker()

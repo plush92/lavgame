@@ -32,7 +32,7 @@ class Kitchen:
 
     def load_image(self):
         try:
-            self.image_path = "assets/kitchen.png"
+            self.image_path = "src/assets/kitchen.png"
             self.image = pygame.image.load(self.image_path).convert_alpha()
             self.image = pygame.transform.scale(self.image, (self.width, self.height))
             print(f"Successfully loaded kitchen background: {self.image_path}")

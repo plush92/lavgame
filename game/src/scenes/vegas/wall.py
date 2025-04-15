@@ -22,8 +22,6 @@ STATE_WALL_GAME = 1
 STATE_ENDING = 2
 game_state = STATE_DIALOGUE
 
-import pygame
-
 class Wall:
     def __init__(self, screen_width, screen_height):
         self.hit_count = 0  
@@ -32,9 +30,9 @@ class Wall:
 
         # Make sure you have all these images in your assets folder
         self.images = [
-            pygame.image.load("assets/wall_normal.png"),
-            pygame.image.load("assets/wall_cracked.png"),
-            pygame.image.load("assets/wall_heavily_cracked.png")  # Add this 3rd image
+            pygame.image.load("src/assets/wall_normal.png"),
+            pygame.image.load("src/assets/wall_cracked.png"),
+            pygame.image.load("src/assets/wall_heavily_cracked.png")  # Add this 3rd image
         ]
         
         self.current_image = self.images[0]  

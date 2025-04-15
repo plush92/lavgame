@@ -11,16 +11,19 @@ class FridgeItem:
         self.image = None
 
         # Load the image for the item
-        self.load_image(image_path)
+        self.image = self.load_image(image_path)
 
     def load_image(self, image_path):
-        """Load the image for the fridge item."""
+        """Load an image from the given path."""
         try:
-            self.image = pygame.image.load(image_path).convert_alpha()
-            self.image = pygame.transform.scale(self.image, (self.width, self.height))
+            # Load the image directly from the provided path
+            image = pygame.image.load(image_path).convert_alpha()
+            image = pygame.transform.scale(image, (self.width, self.height))
+            print(f"Successfully loaded image: {image_path}")
+            return image
         except pygame.error as e:
             print(f"Error loading image {image_path}: {e}")
-            self.image = None
+            return None
 
     def draw(self, surface):
         """Draw the fridge item."""

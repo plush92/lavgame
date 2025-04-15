@@ -6,7 +6,7 @@ from src.scenes.fight.FridgeMinigameScene import FridgeMinigameScene
 from src.scenes.fight.FightScene import FightScene
 from src.scenes.fight.GameOver import GameOver
 from src.scenes.fight.kitchenprop import KitchenProp
-from src.scenes.fight.constants import WIDTH, HEIGHT, FRIDGE_BACKGROUND_PATH, PLAY_AREA_LEFT, PLAY_AREA_RIGHT, PLAY_AREA_TOP, PLAY_AREA_BOTTOM
+from src.scenes.fight.constants import WIDTH, HEIGHT, PLAY_AREA_LEFT, PLAY_AREA_RIGHT, PLAY_AREA_TOP, PLAY_AREA_BOTTOM
 
 class Game:
     def __init__(self):
@@ -27,7 +27,7 @@ class Game:
         # State management
         self.states = {
             "KITCHEN_FIRST": KitchenFirstScene(),
-            "FRIDGE_MINIGAME": FridgeMinigameScene(WIDTH, HEIGHT, FRIDGE_BACKGROUND_PATH),
+            "FRIDGE_MINIGAME": FridgeMinigameScene(WIDTH, HEIGHT, "src/assets/fridge_background.png"),
             "KITCHEN_SECOND": KitchenSecondScene(),
             "FIGHT": FightScene(),
             "GAME_OVER": GameOver(),

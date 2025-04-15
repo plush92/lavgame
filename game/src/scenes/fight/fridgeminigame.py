@@ -3,6 +3,15 @@ import random
 from src.scenes.fight.fridgeitem import FridgeItem
 import os
 
+import sys
+
+def resource_path(relative_path):
+    """Get the absolute path to a resource, works for dev and PyInstaller."""
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
 class FridgeMinigame:
     def __init__(self, screen_width, screen_height, background_image_path):
         self.screen_width = screen_width
@@ -10,23 +19,41 @@ class FridgeMinigame:
         self.fridge_items = []
         self.tortellini_found = False
         self.background_image = None
-        self.load_fridge_image(background_image_path)
+        self.load_image(background_image_path)
         self.setup_items()
 
     def load_fridge_image(self, path):
         """Load the fridge background image."""
         try:
-            self.background_image = pygame.image.load(path).convert_alpha()
+            # Resolve the correct path using resource_path
+            full_path = resource_path(path)
+            self.background_image = pygame.image.load(full_path).convert_alpha()
             self.background_image = pygame.transform.scale(self.background_image, (self.screen_width, self.screen_height))
-            print(f"Successfully loaded fridge background image: {path}")
+            print(f"Successfully loaded fridge background image: {full_path}")
         except pygame.error as e:
             print(f"Error loading fridge background image {path}: {e}")
             self.background_image = None
+
+        # Fallback: Use a solid color if the image fails to load
         if self.background_image is None:
             print("Falling back to solid color for fridge background.")
             self.background_image = pygame.Surface((self.screen_width, self.screen_height))
             self.background_image.fill((230, 240, 250))  # Light blue fallback color
+    
+    def load_image(self, image_path):
+        """Load an image from the given path."""
+        try:
+            # Load the image and scale it to the screen dimensions
+            full_path = os.path.join(image_path)
+            image = pygame.image.load(full_path).convert_alpha()
+            image = pygame.transform.scale(image, (self.screen_width, self.screen_height))
+            print(f"Successfully loaded image: {full_path}")
+            return image
+        except pygame.error as e:
+            print(f"Error loading image {image_path}: {e}")
+            return None
 
+ 
     def setup_items(self):
         """Set up the fridge items for the minigame."""
         num_items = 12
@@ -39,23 +66,22 @@ class FridgeMinigame:
         tortellini_pos = random.randint(0, num_items - 1)
 
         # Define paths to item images
-        assets_dir = os.path.join(os.path.dirname(__file__), "assets")
-        tortellini_image = os.path.join(assets_dir, "tortellini.png")
-        other_images = [
-            os.path.join(assets_dir, "apple.png"),
-            os.path.join(assets_dir, "butter.png"),
-            os.path.join(assets_dir, "cheese.png"),
-            os.path.join(assets_dir, "chocomilk.png"),
-            os.path.join(assets_dir, "jelly.png"),
-            os.path.join(assets_dir, "ketchup.png"),
-            os.path.join(assets_dir, "reeses.png"),
-            os.path.join(assets_dir, "salad.png"),
-            os.path.join(assets_dir, "soda.png"),
-            os.path.join(assets_dir, "steak.png"),
-            os.path.join(assets_dir, "tomato.png"),
-            os.path.join(assets_dir, "yogurt.png"),
-            os.path.join(assets_dir, "icecream.png"),
-            os.path.join(assets_dir, "pickles.png"),
+        tortellini_image_path = resource_path("src/assets/tortellini.png")
+        other_image_paths = [
+            resource_path("src/assets/apple.png"),
+            resource_path("src/assets/butter.png"),
+            resource_path("src/assets/cheese.png"),
+            resource_path("src/assets/chocomilk.png"),
+            resource_path("src/assets/jelly.png"),
+            resource_path("src/assets/ketchup.png"),
+            resource_path("src/assets/reeses.png"),
+            resource_path("src/assets/salad.png"),
+            resource_path("src/assets/soda.png"),
+            resource_path("src/assets/steak.png"),
+            resource_path("src/assets/tomato.png"),
+            resource_path("src/assets/yogurt.png"),
+            resource_path("src/assets/icecream.png"),
+            resource_path("src/assets/pickles.png"),
         ]
 
         for i in range(num_items):
@@ -66,11 +92,11 @@ class FridgeMinigame:
 
             if i == tortellini_pos:
                 # Add the tortellini item
-                self.fridge_items.append(FridgeItem(x, y, "tortellini", tortellini_image))
+                self.fridge_items.append(FridgeItem(x, y, "tortellini", tortellini_image_path))
             else:
                 # Add a random "other" item
-                other_image = random.choice(other_images)
-                self.fridge_items.append(FridgeItem(x, y, "other", other_image))
+                other_image_path = random.choice(other_image_paths)
+                self.fridge_items.append(FridgeItem(x, y, "other", other_image_path))
 
     def reset(self):
         """Reset the fridge minigame."""
