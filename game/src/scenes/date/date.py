@@ -110,7 +110,7 @@ class DatingApp:
         
     def create_profiles(self):
         # Set the directory for profile pictures relative to this script's location
-        img_dir = os.path.join(os.path.dirname(__file__), "profile_pics")
+        img_dir = os.path.join(os.path.dirname(__file__), "../../assets")
         
         # Ensure the directory exists
         if not os.path.exists(img_dir):
@@ -180,7 +180,9 @@ class DatingApp:
     def load_twitch_logo(self):
         """Load the Twitch logo."""
         try:
-            logo_path = os.path.join(os.path.dirname(__file__), "twitchlogo.png")
+            # Update the path to point to the correct directory
+            logo_path = os.path.join(os.path.dirname(__file__), "../../assets/twitchlogo.png")
+            logo_path = os.path.normpath(logo_path)  # Normalize the path for cross-platform compatibility
             logo = pygame.image.load(logo_path).convert_alpha()
             logo = pygame.transform.scale(logo, (80, 80))  # Resize the logo
             return logo
