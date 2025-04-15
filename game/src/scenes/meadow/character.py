@@ -5,7 +5,7 @@ import sys
 import os
 
 # Define the assets directory
-assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src/assets"))
 
 # Colors
 WHITE = (255, 255, 255)
@@ -50,7 +50,7 @@ class Character:
 
     def load_image(self, path):
         try:
-            # Construct the full path to the image
+            # Construct the full path to the image using assets_dir
             full_path = os.path.join(assets_dir, path)
             print(f"Loading image from: {full_path}")  # Debugging
             self.image = pygame.image.load(full_path).convert_alpha()

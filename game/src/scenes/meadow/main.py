@@ -22,8 +22,7 @@ def main():
     pygame.display.set_caption("Meadow Walk")
     clock = pygame.time.Clock()
 
-    # Resolve the directory for assets
-    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+    assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src/assets"))
 
     # Load flower images
     flower_images = [
