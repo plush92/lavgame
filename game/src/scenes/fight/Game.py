@@ -4,9 +4,11 @@ from src.scenes.fight.KitchenFirstScene import KitchenFirstScene
 from src.scenes.fight.KitchenSecondScene import KitchenSecondScene
 from src.scenes.fight.FridgeMinigameScene import FridgeMinigameScene
 from src.scenes.fight.FightScene import FightScene
-from src.scenes.fight.GameOver import GameOver
 from src.scenes.fight.kitchenprop import KitchenProp
+from src.scenes.fight.GameOver import GameOver
+from src.scenes.fight.GameState import GameState
 from src.scenes.fight.constants import WIDTH, HEIGHT, PLAY_AREA_LEFT, PLAY_AREA_RIGHT, PLAY_AREA_TOP, PLAY_AREA_BOTTOM
+from src.scene_wait_for_continue import scene_wait_for_continue  # Import the reusable function
 
 class Game:
     def __init__(self):
@@ -31,9 +33,11 @@ class Game:
             "KITCHEN_SECOND": KitchenSecondScene(),
             "FIGHT": FightScene(),
             "GAME_OVER": GameOver(),
+            
         }
         self.current_state = self.states["KITCHEN_FIRST"]
         self.running = True
+        self.finished = False  # Add a flag to indicate when the fight scene is finished
     
     def show_intro_screen(self):
         """Display a black screen with the text 'With Dad...' before the game starts."""
@@ -70,19 +74,28 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 else:
-                    self.handle_events(event)
+                    self.current_state.handle_events(event, self)
 
-            self.update()
+            self.current_state.update(self)
             self.screen.fill((255, 255, 255))  # Clear the screen
-            self.draw()
+            self.current_state.draw(self.screen, self)
             pygame.display.flip()
             self.clock.tick(60)
 
+            # Check if the fight scene is finished
+            if self.finished:
+                # self.running = False  # Exit the loop to return control to the caller
+                result = scene_wait_for_continue(self.screen)
+                if result == "continue":
+                    return "continue"
         pygame.quit()
 
 def start_fight():
-    game = Game()  # This runs the fight scene when called
-    game.run()
+    """Starts the fight scene and waits for the player to continue."""
+    game = Game()
+    game.run()  # Run the fight scene
 
-if __name__ == "__main__":
-    start_fight()
+    # # Directly transition to the "Press SPACE to continue" screen
+    # result = scene_wait_for_continue(game.screen)
+    # if result == "continue":
+    #     return "continue"  # Signal to the game() function to proceed to the next scene

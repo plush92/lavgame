@@ -7,7 +7,6 @@ from src.scenes.driving.driving import start_driving  # Import DrivingScene clas
 from src.scenes.bar.game import start_bar  # Import BarScene class
 from src.scenes.date.date import start_date  # Import DateScene class
 from src.scenes.vegas.vegas import start_vegas  # Import VegasScene class
-from src.scenes.home import start_home  # Import HomeScene class
 from src.scenes.meadow.main import start_end  # Import EndScene class
 
 WIDTH, HEIGHT = 800, 600
@@ -48,7 +47,7 @@ def main_menu():
         # Button interactions
         if button_1.collidepoint((mx, my)):
             if click:
-                game()
+                game()  # Start the game and play scenes in order
         if button_2.collidepoint((mx, my)):
             if click:
                 pygame.quit()
@@ -63,9 +62,6 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    game()  # Start the game when SPACE is pressed
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
@@ -74,6 +70,7 @@ def main_menu():
         clock.tick(60)
 
 def game():
+    """Plays all scenes in order."""
     scenes = [
         start_intro,
         start_fight,
@@ -81,23 +78,13 @@ def game():
         start_date,
         start_vegas,
         start_driving,
-        start_home,
         start_end
     ]
 
     for scene in scenes:
-        while True:  # Loop until a valid response is received
-            result = scene()
+        result = scene()  # Call each scene function
+        if result == "exit":  # Allow scenes to signal an exit
+            pygame.quit()
+            sys.exit()
 
-            if result == "continue":  # Move to the next scene
-                break
-            elif result == "menu":  # Return to main menu
-                main_menu()
-                return
-            elif result == "exit":  # Quit the game
-                pygame.quit()
-                sys.exit()
-
-    main_menu()  # When all scenes finish, go back to menu
-
-
+    main_menu()  # Return to the main menu after all scenes

@@ -2,7 +2,7 @@ import pygame
 import time
 from src.scene_wait_for_continue import scene_wait_for_continue
 
-def fade_text(screen, text, font, color, background, duration=2, fade_speed=6):
+def fade_text(screen, text, font, color, background, duration=1, fade_speed=60): #duration = 2, fade_speed = 6
     lines = text.split('\n')  # Split the text into multiple lines
     line_height = font.get_height()  # Get the height of each line
     
@@ -60,16 +60,17 @@ def game_intro():
 
     fade_out(screen, background_color)
 
-    result = scene_wait_for_continue()
+    result = scene_wait_for_continue(screen)
     
     if result == "continue":
-        from game.src.scenes.fight.fight import start_fight  # Import FightScene class  # Import the fight scene module
-        start_fight()  # Start the fight scene
+        # from game.src.scenes.fight.fight import start_fight  # Import FightScene class  # Import the fight scene module
+        # start_fight()  # Start the fight scene
+        return "continue"
 
 def start_intro():
     game_intro()
-    import src.main_menu  # Import main menu module
-    src.main_menu.main_menu()  # Call the main menu again
+    # import src.main_menu  # Import main menu module
+    # src.main_menu.main_menu()  # Call the main menu again
 
 # Run the game
 if __name__ == "__main__":

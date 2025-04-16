@@ -9,6 +9,7 @@ from src.scenes.fight.kitchenprop import KitchenProp
 from src.scenes.fight.kitchen import Kitchen
 from src.scenes.fight.FridgeMiniGame import FridgeMinigame
 from src.scenes.fight.speechbubble import SpeechBubble
+from src.scene_wait_for_continue import scene_wait_for_continue # Import the reusable function
 import os
 
 # CONSTANTS & GLOBAL VARIABLES
@@ -320,8 +321,9 @@ def fight_scene(screen, player, dad, cabinets, table, fridge, small_font):
     screen.blit(fight_instruction, (WIDTH//2 - fight_instruction.get_width()//2, HEIGHT - 30))
     
     # Game over conditions
-    game_state = GAME_OVER if player.health <= 0 or dad.health <= 0 else FIGHTING
-    return game_state
+    if player.health <= 0 or dad.health <= 0:
+        return GAME_OVER  # Transition to GAME_OVER state
+    return FIGHTING
 
 def update_game_over_state(screen, player, font, small_font):
     """Update and draw game over state"""
@@ -423,7 +425,9 @@ def main():
             game_state = fight_scene(screen, player, dad, cabinets, table, fridge, small_font)
                 
         elif game_state == GAME_OVER:
-            update_game_over_state(screen, player, font, small_font)
+            result = scene_wait_for_continue(screen)
+            if result == "continue":
+                return "continue"
         
         # Update display
         pygame.display.flip()

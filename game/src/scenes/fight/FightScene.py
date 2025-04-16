@@ -69,7 +69,13 @@ class FightScene(GameState):
 
         # Check for game over conditions
         if game.player.health <= 0 or game.dad.health <= 0:
+            game.finished = True
             game.change_state("GAME_OVER")
+    
+    def fight_is_over(self):
+        """Check if the fight is over."""
+        # Replace this with your actual logic to determine if the fight is over
+        return True
 
     def draw(self, screen, game):
         """Draw the fighting state."""
