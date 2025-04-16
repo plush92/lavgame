@@ -9,6 +9,8 @@ from src.scenes.bar.bouncer import Bouncer
 from src.scenes.bar.collectable import Collectable
 from src.scenes.bar.patron import BarPatron
 from src.scenes.bar.bartender import Bartender
+from src.scene_wait_for_continue import scene_wait_for_continue  # Import the function
+from src.scenes.date.date import start_date
 
 # Initialize pygame
 pygame.init()
@@ -76,6 +78,7 @@ class Game:
         
         # Game state and dialogue setup
         self.game_state = 'bar'
+        self.next_scene = None
         self.drink_count = 0
         self.dialogue = [
             f"{self.player.name}: What a great night… I wonder if there's any hometown honkey tonk skanks I can leave this bar with…",
@@ -522,7 +525,23 @@ class Game:
                     self.dialogue_timer = 0
     
     def victory(self):
+        # Set the game state to victory
         self.game_state = 'victory'
+
+        # Display the victory screen for 3 seconds
+        screen.fill(BLACK)
+        victory_text = font.render("Found my fanny pack! And three skanks!", True, GREEN)
+        screen.blit(victory_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 - 50))
+        pygame.display.flip()
+        pygame.time.delay(3000)  # Wait for 3 seconds
+
+        # Use scene_wait_for_continue to prompt the user to continue
+        result = scene_wait_for_continue(screen)
+
+        if result == "continue":
+            # Transition to the next scene or restart the game
+            # return "continue"
+            self.next_scene = start_date  # Restart the game or load the next scene
 
 def main():
     # Initialize pygame
@@ -543,6 +562,14 @@ def main():
         
         # Draw everything
         game.draw(screen)
+
+        # Check for scene transitions
+        if game.next_scene:
+            next_scene_function = game.next_scene  # Get the next scene function
+            game.next_scene = None  # Reset the next_scene attribute
+            result = next_scene_function()  # Call the next scene function
+            if result == "continue":
+                game = Game() 
         
         # Cap the frame rate
         clock.tick(60)
