@@ -1,6 +1,8 @@
 import pygame  # Import the pygame library for game development
 import random  # Import the random library for random number generation
 import os  # Import the os library for file path operations
+from src.scene_wait_for_continue import scene_wait_for_continue
+from src.scenes.meadow.main import start_end
 
 # Constants
 WIDTH, HEIGHT = 800, 600  # Screen dimensions
@@ -146,11 +148,7 @@ class DrivingScene:
         screen.blit(subtext, subtext.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50)))
         pygame.display.flip()
 
-        waiting = True
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    waiting = False
+        # Use scene_wait_for_continue to prompt the user to continue
+        result = scene_wait_for_continue(screen)
+        if result == "continue":
+            start_end()  # Transition to the next scene
