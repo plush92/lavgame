@@ -1,6 +1,9 @@
 import pygame
 import sys
 import os
+from src.scene_wait_for_continue import scene_wait_for_continue
+from src.scenes.vegas.vegas import start_vegas  # Import VegasScene class
+
 
 # Initialize pygame
 pygame.init()
@@ -43,6 +46,8 @@ class Profile:
         self.traits = traits
         self.image_path = image_path
         self.load_image()
+        self.selected_timer = 0
+        self.next_scene = None
         
     def load_image(self):
         try:
@@ -79,6 +84,8 @@ class DatingApp:
         
         # Load Twitch logo
         self.twitch_logo = self.load_twitch_logo()
+        self.selected_timer = 0
+        self.next_scene = None
 
         # Create profiles
         self.create_profiles()
@@ -256,6 +263,13 @@ class DatingApp:
             if self.intro_timer <= 0:
                 self.state = SWIPING
                 self.zoom_effect = 0
+        
+        elif self.state == SELECTED:
+            self.selected_timer += 1
+            if self.selected_timer >= 3 * FPS:  # After 3 seconds
+                result = scene_wait_for_continue(self.screen)
+                if result == "continue":
+                    self.next_scene = start_vegas  # Replace with the actual next scene function
     
     def draw_intro(self):
         # Draw bedroom background
@@ -560,6 +574,10 @@ class DatingApp:
             self.update()
             self.draw()
             self.clock.tick(FPS)
+
+            if self.next_scene:
+                self.next_scene()  # Call the next scene function
+                break  # Exit the current loop to transition to the next scene
 
 # Main function
 def start_date():
