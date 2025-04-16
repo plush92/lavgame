@@ -41,8 +41,8 @@ STATE_WALL_GAME = 1
 STATE_ENDING = 2
 
 # Create characters
-tim = Character(name="tim", x=400, y=500, color=(255, 0, 0))
-lav = Character(name="lav", x=400, y=300, color=(255, 255, 0))
+tim = Character(name="tim", x=400, y=500, color=(255, 0, 0), image_path="src/assets/tim.png")
+lav = Character(name="lav", x=400, y=300, color=(255, 255, 0), image_path="src/assets/lav.png")
 
 # Create wall
 wall = Wall(WIDTH, HEIGHT)
@@ -172,7 +172,7 @@ def handle_wall_game_state(dt, game_vars):
     # Draw everything with applied screen shake
     wall.draw(screen, offset_x, offset_y)
     tim.draw(screen, dt, offset_x, offset_y)
-    lav.draw(screen, dt, offset_x, offset_y)
+    # lav.draw(screen, dt, offset_x, offset_y)
 
     # Draw encouragement texts, looping after every hit.
     encouragement_rendering.draw(screen)

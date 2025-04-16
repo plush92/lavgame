@@ -38,13 +38,18 @@ STATE_ENDING = 2
 game_state = STATE_DIALOGUE
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, name, x, y, color):
+    def __init__(self, name, x, y, color, image_path=None):
         super().__init__()
         self.name = name
-        self.image = pygame.Surface((50, 50))  # Create a surface for the character
+        self.image_path = image_path  # Path to the character's image
+        self.image = pygame.Surface((50, 50))  # Default surface if no image is provided
         self.image.fill(color)
         self.rect = self.image.get_rect(center=(x, y))
         
+        # Load the character's image if a path is provided
+        if self.image_path:
+            self.load_image()
+
         # Animation variables
         self.swinging = False
         self.swing_timer = 0
@@ -55,8 +60,17 @@ class Character(pygame.sprite.Sprite):
         
         # Movement variables
         self.speed = 200  # Speed in pixels per second
-
         self.has_hit_wall_this_swing = False
+
+    def load_image(self):
+        """Load the character's image from the given path."""
+        try:
+            loaded_image = pygame.image.load(self.image_path).convert_alpha()
+            self.image = pygame.transform.scale(loaded_image, (50, 50))  # Scale to fit the character size
+        except pygame.error as e:
+            print(f"Error loading image for {self.name}: {e}")
+            # Fallback to default surface if loading fails
+            self.image.fill((255, 0, 0))  # Fill with red to indicate an error
 
     def swing(self):
         """Start swinging the hammer if not already swinging"""

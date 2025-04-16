@@ -1,6 +1,8 @@
 import pygame
 import time
 from src.scenes.vegas.paper import Paper
+from src.scene_wait_for_continue import scene_wait_for_continue
+from src.scenes.driving.driving import start_driving
 
 class EndingSequence:
     def __init__(self, screen, width, height, tim, lav):
@@ -22,6 +24,16 @@ class EndingSequence:
         self.text_timer = 0
         self.tim = tim
         self.lav = lav
+
+        # Load heart images
+        self.red_heart = pygame.image.load("src/assets/redheart.png").convert_alpha()
+        self.blue_heart = pygame.image.load("src/assets/blueheart.png").convert_alpha()
+        self.purple_heart = pygame.image.load("src/assets/purpleheart.png").convert_alpha()
+
+        # Scale heart images
+        self.red_heart = pygame.transform.scale(self.red_heart, (60, 60))
+        self.blue_heart = pygame.transform.scale(self.blue_heart, (60, 60))
+        self.purple_heart = pygame.transform.scale(self.purple_heart, (100, 100))
 
     def draw_text(self, text, font, color, x, y, center=True, scale=1.0):
         """Draw text with a popping effect."""
@@ -47,22 +59,27 @@ class EndingSequence:
         """Draw the heart animation."""
         self.heart_timer += dt
         if self.heart_stage == 0:  # Red heart from Tim
-            pygame.draw.circle(self.screen, self.RED, (self.WIDTH // 2 - 50, self.HEIGHT // 2), 30)
+            self.screen.blit(self.red_heart, (self.WIDTH // 2 - 80, self.HEIGHT // 2 - 30))
             if self.heart_timer > 1.5:
                 self.heart_stage = 1
                 self.heart_timer = 0
         elif self.heart_stage == 1:  # Blue heart from Lav
-            pygame.draw.circle(self.screen, self.BLUE, (self.WIDTH // 2 + 50, self.HEIGHT // 2), 30)
+            self.screen.blit(self.blue_heart, (self.WIDTH // 2 + 20, self.HEIGHT // 2 - 30))
             if self.heart_timer > 1.5:
                 self.heart_stage = 2
                 self.heart_timer = 0
         elif self.heart_stage == 2:  # Purple heart merging
-            pygame.draw.circle(self.screen, self.PURPLE, (self.WIDTH // 2, self.HEIGHT // 2), 50)
+            self.screen.blit(self.purple_heart, (self.WIDTH // 2 - 50, self.HEIGHT // 2 - 50))
 
     def draw_characters(self, dt):
         """Keep characters visible during the ending."""
-        self.tim.draw(self.screen, dt)
-        self.lav.draw(self.screen, dt)
+        # Move Lav slightly to the right to avoid overlap with the purple heart
+        lav_offset_x = 50  # Adjust this value as needed
+        lav_rect = self.lav.rect.copy()
+        lav_rect.x += lav_offset_x
+
+        self.tim.draw(self.screen, dt)  # Draw Tim in his original position
+        self.screen.blit(self.lav.image, lav_rect)  # Draw Lav with the adjusted position
 
     def draw_text_sequence(self, dt):
         """Display text sequentially with a popping effect."""
@@ -87,3 +104,15 @@ class EndingSequence:
         self.draw_characters(dt)
         self.draw_heart(dt)
         self.draw_text_sequence(dt)
+
+        # Check if the ending sequence is complete
+        if self.heart_stage == 2 and self.text_stage >= 3:  # All hearts and text displayed
+            # Add a delay to ensure the final line is visible
+            if not hasattr(self, "final_text_timer"):
+                self.final_text_timer = 0  # Initialize the timer
+            self.final_text_timer += dt
+
+            if self.final_text_timer > 2:  # Wait 2 seconds before prompting
+                result = scene_wait_for_continue(self.screen)  # Prompt the user to continue
+                if result == "continue":
+                    start_driving()  # Transition to the next scene
