@@ -5,7 +5,7 @@ from src.scenes.meadow.constants import WIDTH, HEIGHT
 
 letter_text = """Timmy, this is the first birthday I have the privilege of spending with you. 
 From the moment I met you, something in me starved, howled. 
-A hunger I did not know my body could feel—raw, desperate, insatiable. 
+A hunger I did not know my body could feel. Raw, desperate, insatiable. 
 You are fire and velocity, bold and brazen, reckless and magnificent. 
 But you are warmth, too. A hearth in the dead of winter. 
 You are kindness. A gooey center, a young emotional loving child. 
@@ -19,7 +19,7 @@ Your passion burns, it devours, it lifts me into a world I never dared to believ
 Every moment with you is a chapter I never want to end, a storybook where the pages turn too fast.
 This is the first time I have watched you step deeper into time, 
 the first year I have witnessed you grow older. 
-And I want more—selfishly, endlessly. 
+And I want more. Selfishly, endlessly. 
 I want to watch the years carve their poetry into your skin, 
 to trace each line, 
 to hold time by its throat and beg it to slow, 

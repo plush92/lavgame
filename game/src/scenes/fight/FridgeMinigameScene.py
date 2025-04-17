@@ -1,4 +1,4 @@
-from src.scenes.fight.FridgeMiniGame import FridgeMinigame
+from src.scenes.fight.fridgeminigame import FridgeMinigame
 
 class FridgeMinigameScene:
     def __init__(self, screen_width, screen_height, background_image_path):

@@ -1,8 +1,8 @@
 import pygame
 import time
-from src.scene_wait_for_continue import scene_wait_for_continue
+from src.scene_wait_for_continue  import scene_wait_for_continue
 
-def fade_text(screen, text, font, color, background, duration=1, fade_speed=60): #duration = 2, fade_speed = 6
+def fade_text(screen, text, font, color, background, duration=1, fade_speed=10): #duration = 2, fade_speed = 6
     lines = text.split('\n')  # Split the text into multiple lines
     line_height = font.get_height()  # Get the height of each line
     

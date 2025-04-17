@@ -159,7 +159,7 @@ def main():
     # Game end screen
     if game_won:
         screen.fill(GREEN)
-        win_text = font.render("You made it to the picnic!", True, WHITE)
+        win_text = font.render("You did it!", True, WHITE)
         screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, 
                                SCREEN_HEIGHT // 2 - win_text.get_height() // 2))
         pygame.display.flip()

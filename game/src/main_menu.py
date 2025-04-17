@@ -1,4 +1,5 @@
 import pygame
+pygame.init()
 import sys
 from src.level_select import level_select
 from src.scenes.intro import start_intro  # Import IntroScene class
