@@ -33,23 +33,18 @@ class DialogSystem:
         self.dialog_index = 0
         self.active = True
         self.dialog_first = [
-            {"speaker": "Tim", "text": "So hungry. Can't wait to eat some tortellini!"},
-            {"speaker": "Tim", "text": "...Oh, hey dad"},
-            {"speaker": "Dad", "text": "The prodigal son! I am a god and therefore you are the messiah, oh anointed one!"},
-            {"speaker": "Tim", "text": "I am actually better and stronger than you"}
+            {"speaker": "Tim", "text": "Text replaced"},
+            {"speaker": "Tim", "text": "Text replaced"},
         ]
 
         self.dialog_second = [
             #Open fridge to look for tortellini*
-            {"speaker": "Tim", "text": "Found it!"},
-            {"speaker": "Dad", "text": "You've done some innocuous thing that has made me irrationally angry!"},
-            {"speaker": "Tim", "text": "Your anger has made me angry!"},
-            {"speaker": "Dad", "text": "You are my son you must obey me!"},
-            {"speaker": "Tim", "text": "I have an oppositionally defiant personality because I was both spoiled rotten and ignored!"},
-            {"speaker": "Dad", "text": "I don't have the proper skills needed to manage my emotions so my anger is building!"},
-            {"speaker": "Tim", "text": "And because you don't, I never learned them either and so my anger is also building!"},
-            {"speaker": "Dad", "text": "Ahhh!"},
-            {"speaker": "Tim", "text": "Grrrr!"},
+            {"speaker": "Tim", "text": "Text replaced"},
+            {"speaker": "Tim", "text": "Text replaced"},            {"speaker": "Tim", "text": "Text replaced"},
+            {"speaker": "Tim", "text": "Text replaced"},            {"speaker": "Tim", "text": "Text replaced"},
+            {"speaker": "Tim", "text": "Text replaced"},            {"speaker": "Tim", "text": "Text replaced"},
+            {"speaker": "Tim", "text": "Text replaced"},            {"speaker": "Tim", "text": "Text replaced"},
+            {"speaker": "Tim", "text": "Text replaced"},
             # {"speaker": "Narrator", "text": "Fight ensues..."},
         ]
 
