@@ -1,5 +1,5 @@
 1. Start by interacting with dad
-    He says some bullshit
+    dialogue
     Maybe dialogue options, and you respond
     Either way you begin a fight. (spacebar to strike, b to block, down arrow to dodge)
     `FightScene`
