@@ -2,3 +2,5 @@
 *.txt
 __pycache__/
 .vscode/
+src/scenes/meadow/letter.py
+src/scenes/fight/dialogue.py
