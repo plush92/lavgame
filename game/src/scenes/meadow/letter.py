@@ -3,29 +3,7 @@ import os
 import math
 from src.scenes.meadow.constants import WIDTH, HEIGHT
 
-letter_text = """Timmy, this is the first birthday I have the privilege of spending with you. 
-From the moment I met you, something in me starved, howled. 
-A hunger I did not know my body could feel. Raw, desperate, insatiable. 
-You are fire and velocity, bold and brazen, reckless and magnificent. 
-But you are warmth, too. A hearth in the dead of winter. 
-You are kindness. A gooey center, a young emotional loving child. 
-You are loyalty carved from bone, unwavering, unshaken. 
-There is nothing false in you; your very breath thrums with life, more vivid, 
-more searing than anyone I have ever known. 
-
-And you, with your ridiculous jokes and your laughter that crashes against my ribs like waves. 
-I have never laughed like this before. 
-Your passion burns, it devours, it lifts me into a world I never dared to believe in. 
-Every moment with you is a chapter I never want to end, a storybook where the pages turn too fast.
-This is the first time I have watched you step deeper into time, 
-the first year I have witnessed you grow older. 
-And I want more. Selfishly, endlessly. 
-I want to watch the years carve their poetry into your skin, 
-to trace each line, 
-to hold time by its throat and beg it to slow, 
-to stretch each second until I have wrung every last drop of you.
-I love you. More today than yesterday, more tomorrow than today.
-Happy birthday, my love."""
+letter_text = "Text replaced"
 font_size = 11
 
 def create_blur(surface, amount):
